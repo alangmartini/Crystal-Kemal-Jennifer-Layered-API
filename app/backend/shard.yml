@@ -23,6 +23,9 @@ dependencies:
   crystal-mysql:
     github: crystal-lang/crystal-mysql
     version: "= 0.14.0"
+  sam:
+    github: imdrasil/sam.cr
+    version: 0.4.2
   mysql:
     github: crystal-lang/crystal-mysql
 
