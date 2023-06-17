@@ -1,2 +1,4 @@
+require "spec-kemal"
 require "spec"
-require "../src/teste"
+require "../src/app"
+require "./mocks/travel.mock.cr"

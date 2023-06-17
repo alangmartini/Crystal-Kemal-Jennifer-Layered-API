@@ -13,9 +13,17 @@ crystal: 1.8.2
 license: MIT
 
 dependencies:
+  spec-kemal:
+    github: kemalcr/spec-kemal
   kemal:
     github: kemalcr/kemal
   jennifer:
     github: imdrasil/jennifer.cr
+    version: "~> 0.13.0"
   mysql:
     github: crystal-lang/crystal-mysql
+
+development_dependencies:
+  ameba:
+    github: crystal-ameba/ameba
+    version: ~> 1.4.0
