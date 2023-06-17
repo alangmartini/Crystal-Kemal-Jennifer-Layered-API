@@ -20,6 +20,9 @@ dependencies:
   jennifer:
     github: imdrasil/jennifer.cr
     version: "~> 0.13.0"
+  crystal-mysql:
+    github: crystal-lang/crystal-mysql
+    version: "= 0.14.0"
   mysql:
     github: crystal-lang/crystal-mysql
 
