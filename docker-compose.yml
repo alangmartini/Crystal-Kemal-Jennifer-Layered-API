@@ -1,0 +1,23 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: my_user
+      MYSQL_PASSWORD: my_password
+    ports:
+      - "3306:3306"
+  api:
+    build: ./app/backend
+    command: crystal run src/app.cr
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    # Dev
+    volumes:
+      - ./app/backend:/app
+    tty: true
+    stdin_open: true
