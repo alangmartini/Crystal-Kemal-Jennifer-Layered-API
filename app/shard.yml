@@ -1,0 +1,13 @@
+name: teste
+version: 0.1.0
+
+authors:
+  - gmaralan <gmartinialan@gmail.com>
+
+targets:
+  teste:
+    main: src/teste.cr
+
+crystal: 1.8.2
+
+license: MIT
