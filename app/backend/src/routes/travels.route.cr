@@ -5,9 +5,10 @@ require "../models/rel_travel_plans_travel_stops.model"
 require "jennifer"
 
 module UserRoutes
-  post "/" do |env|
+  post "/travel-plans" do |env|
 
     body = env.request.body.try &.gets_to_end
+
     if body
       parsed_body = JSON.parse(body)
       travel_stops = parsed_body["travel_stops"].as_a
@@ -22,9 +23,6 @@ module UserRoutes
 
     if travel_id
       travel_stops.each do |travel_stop|
-        puts "travel is #{travel_stop}"
-        puts typeof(travel_stop)
-
         value = travel_stop.is_a?(Symbol) ? travel_stop.to_s.to_i64? : travel_stop.as_i64?
 
         RelTravelPlansTravelStops.create({
@@ -32,6 +30,9 @@ module UserRoutes
           travel_stop_id: value
         })    
       end
+
+      env.response.content_type = "application/json"
+      env.response.status_code = 201
 
       {
       "id": travel_id,
