@@ -1,8 +1,10 @@
 require "jennifer"
 
-class TravelPlan < Jennifer::Model::Base
+class TravelPlans < Jennifer::Model::Base
+  table_name :travel_plans
+  
   mapping(
-    id: Primary32,
+    id: {type: Int64, primary: true},
     travel_stops: Int32,
   )
 end

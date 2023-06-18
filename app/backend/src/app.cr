@@ -1,6 +1,13 @@
-# TODO: Write documentation for `Teste`
-module Teste
-  VERSION = "0.1.0"
+require "kemal"
+require "../config/config.cr"
+require "./routes/travels.route.cr"
 
-  # TODO: Put your code here
-end
+include UserRoutes
+
+# Create and populate the database. This is done here
+# instead of inside Dockerfile because it needs
+# the db to be created and running.
+Process.run("crystal", ["sam.cr", "db:create"])
+Process.run("crystal", ["sam.cr", "db:migrate"])
+
+Kemal.run
