@@ -9,6 +9,15 @@ services:
       MYSQL_PASSWORD: pass
     ports:
       - "3306:3306"
+  db_spec:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: rick_and_morty_spec
+      MYSQL_USER: rooty
+      MYSQL_PASSWORD: pass
+    ports:
+      - "5433:3306"
     
   api:
     build: ./app/backend
