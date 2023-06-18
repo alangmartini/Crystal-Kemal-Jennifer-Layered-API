@@ -11,9 +11,8 @@ development:
 
 test:
   <<: *default
-  db: rick_and_morty_specs
+  db: rick_and_morty_spec
   host: db_spec
-  port: "5433"
 
 production:
   <<: *default
