@@ -1,8 +1,7 @@
 class CreateTravelPlans < Jennifer::Migration::Base
   def up
     create_table :travel_plans do |t|
-      t.integer :id
-      t.integer :travel_stops
+      t.integer :id, { :primary => true, :auto_increment => true }
     end
   end
 
