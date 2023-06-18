@@ -1,7 +1,7 @@
 default: &default
   host: db
   user: rooty
-  password: my_password
+  password: pass
   adapter: mysql
   migration_files_path: ../migrations
 
