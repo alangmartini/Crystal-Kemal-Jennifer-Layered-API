@@ -48592,174 +48592,48 @@ response = {
 require "http/client"
 require "json"
 
-def get_locations(ids)
-  query = <<-GRAPHQL
-  query GetLocations($ids: [ID!]!) {
-    locationsByIds(ids: $ids) {
-      id
-      dimension
-      name
-    }
-  }
-  GRAPHQL
+require "./app/backend/src/entities/**"
 
-  # Wrap the query in a JSON payload
-  payload = {
-    "query" => query,
-    "variables" => {
-      "ids" => ids
-    }
-  }.to_json
+travel_stops = [1, 2, 3, 4, 5, 6, 7].uniq
 
-  # Create the HTTP client
-  client = HTTP::Client.new("rickandmortyapi.com", tls: true)
+graph_ql_query = RickAndMortyApiClient.new(travel_stops)
+response = graph_ql_query.execute()
 
-  # Send a POST request to the GraphQL endpoint with the JSON payload
-  response = client.post("/graphql", headers: HTTP::Headers{"Content-Type" => "application/json"}, body: payload)
+locations = response["data"]["locationsByIds"].as_a
+  .map { |location| Location.from_json(location.to_json) }
 
-  # Parse the response body
-  parsed_response = JSON.parse(response.body)
-
-  parsed_response
-end
-
-travel_stops = [1, 2, 3, 4, 5, 6].uniq
-
-
-alias TypeCharacters = Array(NamedTuple(id: String))
-alias TypeEpisode = Array(NamedTuple(characters: TypeCharacters))
-alias TypeResidents = Array(NamedTuple(episode: TypeEpisode))
-alias TypeLocation = NamedTuple(
-    id: String,
-    dimension: String,
-    "type": String,
-    name: String,
-    residents: TypeResidents
-  )
-alias TypeSimplifiedLocation = NamedTuple(
-    id: String,
-    dimension: String,
-    "type": String,
-    name: String,
-    residents: Int32
-  )
-
-# TravelStop doesnt have residents prop
-alias TypeTravelStop = Array(NamedTuple(
-  id: String,
-  dimension: String,
-  "type": String,
-  name: String,
-))
-
-alias TypeRawTravelStop = Array(Int32)
   
+simplified_locations = LocationSimplificator
+  .simplify(locations)
 
-
-
-# locations = get_locations()
-locations = response
-
-locations = locations["data"]["locationsByIds"]
-
-def calculate_residents(residents_arr : TypeResidents) : Int32
-  episode_size = [] of Int32
-  residents_arr.each do |resident|
-    resident["episode"].each do |character|
-      episode_size << character["characters"].size
-    end
-  end
-
-  episode_size.sum
-end
-
-# Transform the Locations in Simplified Locations, where the residents is a Int32
-# representing its amount.
-def get_simplified_locations(locations : Array(TypeLocation)) : Array(TypeSimplifiedLocation)
-  # Copy to new_locations the content in locations
-  # while emptying the memory at the same time.
-  # This allows to do a map without holding two copies
-  # of the very big variable locations
-  new_locations = [] of TypeSimplifiedLocation
-
-  locations.each do |location|
-    new_location = location.merge({ "residents": calculate_residents(location["residents"]) })
-    new_locations << new_location
-
-    location = nil
-  end
-
-  new_locations
-end
-
-simplified_locations : Array(TypeSimplifiedLocation) = get_simplified_locations(locations)
-
-def optimize_simplified_locations(
-    simplified_locations : Array(TypeSimplifiedLocation)
-  ) : Array(TypeSimplifiedLocation)
-  # Regras do optimize
-  # 1. Todos as paradas de uma mesma dimensão devem estar agrupadas OK
-  # 2. Dentro de uma mesma dimensão, as paradas devem estar ordenadas em ordem CRESC de popularidade OK
-  # 3. Caso o item acima empate, deve-se ordenar por ordem alfabética OK
-  # 4. A ordem de visita das dimensões é definida pela média de suas populações totais.
-
-  grouped_locations = simplified_locations.group_by { |location| location["dimension"] }
-
-  grouped_locations.each do |key, value|
-    grouped_locations[key] = value.sort do |a, b|
-      result = a["residents"] <=> b["residents"]
-      result.zero? ? a["name"] <=> b["name"] : result
-    end
-  end
-
-  sorted = grouped_locations.to_a.sort do |a, b|
-    a_residents = a[1].map { |location| location["residents"] }.sum
-    b_residents = b[1].map { |location| location["residents"] }.sum
-
-    a_residents <=> b_residents
-  end
-
-  sorted_locations_only = [] of TypeSimplifiedLocation
-
-  sorted.each do |group_location|
-    group_location[1].each do |location|
-      sorted_locations_only << location
-    end
-  end
-
-  sorted_locations_only
-end
-
-optimized_simplified_locations : Array(TypeSimplifiedLocation) = optimize_simplified_locations(simplified_locations)
-
-alias TypeConstructedReponse = NamedTuple(id: Int32, travel_stops: Array(Int32))
+optimised_locations = LocationOptimiser.optimise(simplified_locations)
 
 constructed_response = [
-  {id: 1, travel_stops: [1, 2]},
-  {id: 2, travel_stops: [1, 2, 3, 4, 5]},
+  ConstructedTravelPlan.new(id = 1, travel_stops = [1, 2]),
+  ConstructedTravelPlan.new(id = 2, travel_stops = [2, 3, 4, 5, 6, 7]),
 ]
 
-expand = false
+# expand = false
 
-def create_new_travel_stops(
-    is_expand : Bool,
-    travel_stops : TypeRawTravelStop,
-    optimized_simplified_locations : Array(TypeSimplifiedLocation)
-    )
-  new_travel_stops  = optimized_simplified_locations
-    .select { |location| travel_stops.includes?(location["id"].to_i) }
+# def create_new_travel_stops(
+#     is_expand : Bool,
+#     travel_stops : TypeRawTravelStop,
+#     optimized_simplified_locations : Array(TypeSimplifiedLocation)
+#     )
+#   new_travel_stops  = optimized_simplified_locations
+#     .select { |location| travel_stops.includes?(location["id"].to_i) }
 
-  if !(is_expand)
-    new_travel_stops = new_travel_stops.map { |location| location["id"].to_i }
-  end
+#   if !(is_expand)
+#     new_travel_stops = new_travel_stops.map { |location| location["id"].to_i }
+#   end
 
-  new_travel_stops
-end
+#   new_travel_stops
+# end
 
-new_constructed_response = constructed_response.map do |response|
-  new_response = response.merge({
-    "travel_stops": create_new_travel_stops(expand, response["travel_stops"], optimized_simplified_locations)
-  })
-end
+# new_constructed_response = constructed_response.map do |response|
+#   new_response = response.merge({
+#     "travel_stops": create_new_travel_stops(expand, response["travel_stops"], optimized_simplified_locations)
+#   })
+# end
 
-puts new_constructed_response
+# puts new_constructed_response
