@@ -1,11 +1,16 @@
 # /routes/user_routes.cr
 require "kemal"
+require "http/client"
+require "json"
+require "jennifer"
 require "../models/travel_plan.model"
 require "../models/rel_travel_plans_travel_stops.model"
-require "jennifer"
+
+require "../entities/TravelPlans/**"
+require "../entities/RickAndMorty/**"
 
 module UserRoutes
-  post "/travel-plans" do |env|
+  post "/travel_plans" do |env|
 
     body = env.request.body.try &.gets_to_end
 
@@ -41,30 +46,55 @@ module UserRoutes
     end 
   end
 
-  get "/travel-plans" do |env|
-    result = TravelPlans.all.to_json
-    
-    travel_stops = [] of NamedTuple(id: Int32, travel_stops: Array(Int32))
+  get "/travel_plans" do |env|
+    optimize = env.params.query["optimize"]?
+    expand = env.params.query["expand"]?
 
-    JSON.parse(result).as_a.each do |row|
-      id = row["id"].as_i
-      travel_stops_id =  RelTravelPlansTravelStops
-        .all
-        .where { _travel_plan_id == id }
-        .to_json(only: %w[travel_stop_id])
+    constructed_travel_plans : Array(ConstructedTravelPlan)  = GetTravelPlansResponseConstructor
+      .get_all_constructed_travel_plans()
 
-      teste = JSON.parse(travel_stops_id).as_a.map { |row| row["travel_stop_id"].as_i }
+    puts constructed_travel_plans
+
+    # if optimize || expand
+    #   rick_and_morty_api_response = HTTP::Client
+    #     .get("https://rickandmortyapi.com/api/location/#{travel_stops.join(",")}")
+
+    #   locations_arr = JSON.parse(rick_and_morty_api_response.body).as_a
       
-      puts typeof(teste.inspect)
+    #   # if optimize
+    #   #   constructed_response = constructed_response.map do |travel|
+    #   #     new_travel_stops = travel["travel_stops"].map do |travel_stop|
+    #   #       location = locations_arr.find { |location| location["id"] == travel_stop }
+            
+    #   #     end
+    #   #     { "id": travel["id"], "travel_stops": new_travel_stops }
+    #   #   end
+    #   # end
+      
+    #   # if expand
+    #   #   constructed_response = constructed_response.map do |travel|
+    #   #     new_travel_stops = travel["travel_stops"].map do |travel_stop|
+    #   #       location = locations_arr.find { |location| location["id"] == travel_stop }
+    #   #       if location
+    #   #         {
+    #   #           "id": location["id"],
+    #   #           "name": location["name"],
+    #   #           "type": location["type"],
+    #   #           "dimension": location["dimension"],
+    #   #         }
+    #   #       else
+    #   #         travel_stop
+    #   #       end
+    #   #     end
+    #   #     { "id": travel["id"], "travel_stops": new_travel_stops }
+    #   #   end
 
-      travel = { "id": id, "travel_stops": teste, }
-      puts "travel #{travel}"
-      travel_stops << travel
-    end
+    #   # end
+    # end
 
-    env.response.content_type = "application/json"
-    env.response.status_code = 200
+    # env.response.content_type = "application/json"
+    # env.response.status_code = 200
 
-    travel_stops.to_json
+    # constructed_response.to_json
   end
 end
