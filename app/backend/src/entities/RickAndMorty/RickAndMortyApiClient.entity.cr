@@ -13,6 +13,7 @@ class RickAndMortyApiClient
         id
         dimension
         name
+        type
         residents {
           episode {
             characters {

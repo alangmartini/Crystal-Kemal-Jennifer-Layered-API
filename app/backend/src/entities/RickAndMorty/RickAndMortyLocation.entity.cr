@@ -34,5 +34,8 @@ class Location
   property name : String
 
   @[JSON::Field]
-  property residents : Array(Resident)
+  property "type" : String
+
+  @[JSON::Field]
+  property residents : Array(Resident) | Nil
 end
