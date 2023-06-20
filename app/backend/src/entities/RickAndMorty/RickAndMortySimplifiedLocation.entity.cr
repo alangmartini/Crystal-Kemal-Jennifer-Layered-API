@@ -1,18 +1,31 @@
-require "json"
-
+# Similar to `Location`, but here the Residents file
+# is flattened to a Int32 representing the amount of residents.
+# which is the only information relevant to this class.
 class SimplifiedLocation
-  property id : String
+  property id : Int64
   property dimension : String
   property name : String
-  property "type" : String
-  property residents : Int32
+  property residents : Int64
+
+  # Best pratices says that we should not use `type` as a property name
+  # but the challenge requires it.
+  getter :_type
+  setter :_type
 
   def initialize(
-    @id : String,
+    @id : Int64,
     @dimension : String,
     @name : String,
-    @type : String,
-    @residents : Int32
+    @_type : String,
+    @residents : Int64
   )
+  end
+
+  def type
+    @_type
+  end
+
+  def type=(value)
+    @_type = value
   end
 end

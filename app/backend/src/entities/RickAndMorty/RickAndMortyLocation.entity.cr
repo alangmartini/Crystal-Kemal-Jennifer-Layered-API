@@ -1,5 +1,3 @@
-require "json"
-
 class Character
   include JSON::Serializable
 
@@ -33,9 +31,9 @@ class Location
   @[JSON::Field]
   property name : String
 
-  @[JSON::Field]
-  property "type" : String
+  @[JSON::Field(key: "type")]
+  property type_alias : String
 
   @[JSON::Field]
-  property residents : Array(Resident) | Nil
+  property residents : Array(Resident)
 end

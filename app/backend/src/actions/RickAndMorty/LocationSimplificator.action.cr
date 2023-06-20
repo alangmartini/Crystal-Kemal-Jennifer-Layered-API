@@ -1,13 +1,13 @@
 class LocationSimplificator
-  def self.calculate_residents(residents_arr : Array(Resident)) : Int32
-    episode_size = [] of Int32
+  def self.calculate_residents(residents_arr : Array(Resident)) : Int64
+    episode_size = [] of Int64
     residents_arr.each do |resident|
       resident.episode.each do |character|
-        episode_size << character.characters.size
+        episode_size << character.characters.size.to_i64
       end
     end
 
-    episode_size.sum
+    episode_size.sum.to_i64
   end
 
   def self.simplify(
@@ -24,10 +24,11 @@ class LocationSimplificator
       new_resident = self.calculate_residents(location.residents)
 
       new_location = SimplifiedLocation.new(
-        id: location.id,
+        id: location.id.to_i64,
         dimension: location.dimension,
         name: location.name,
-        residents: new_resident
+        residents: new_resident,
+        _type: location.type_alias
       )
 
       new_locations << new_location

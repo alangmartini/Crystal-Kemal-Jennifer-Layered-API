@@ -5,7 +5,7 @@ require "../HttpClient.entity"
 # end
 
 class RickAndMortyApiClient
-  def initialize(@ids : Array(Int32))
+  def initialize(@ids : Array(Int64))
     @http_client = HttpClient.new("rickandmortyapi.com", true)
     @query = <<-GRAPHQL
     query GetLocations($ids: [ID!]!) {

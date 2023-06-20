@@ -1,4 +1,3 @@
-
 class RawTravelPlan
   include JSON::Serializable
 

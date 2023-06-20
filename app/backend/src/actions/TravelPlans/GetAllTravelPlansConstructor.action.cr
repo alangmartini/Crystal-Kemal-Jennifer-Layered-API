@@ -6,7 +6,8 @@ class GetTravelPlansResponseConstructor
     # In Jennifer, .all only refers to a query,
     # needing thus .to_json to execute it.
     result = TravelPlans.all.to_json
-
+    puts result
+    puts typeof(result)
     raw_travel_plans : Array(RawTravelPlan) = JSON
       .parse(result).as_a
       .map { |row| RawTravelPlan.from_json(row.to_json) }
@@ -21,7 +22,7 @@ class GetTravelPlansResponseConstructor
         .where { _travel_plan_id == raw_travel_plan.id }
         .to_json(only: %w[travel_stop_id])
 
-      travel_stops_ids: Array(Int64) = JSON
+      travel_stops_ids : Array(Int64) = JSON
         .parse(travel_stops_id)
         .as_a.map { |row| row["travel_stop_id"].as_i.to_i64 }
 
@@ -42,4 +43,17 @@ class GetTravelPlansResponseConstructor
         )
       end
   end
+
+  def self.get_all_unique_travel_stops_ids(
+    construct_travel_plans : Array(ConstructedTravelPlan)
+  ) : Array(Int64)
+
+    travel_stops = [] of Int64
+    construct_travel_plans
+      .each { |a| a.travel_stops.each { |b| travel_stops << b } }
+
+    travel_stops = travel_stops.uniq
+
+    travel_stops
+  end 
 end

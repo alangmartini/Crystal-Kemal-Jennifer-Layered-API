@@ -3,11 +3,12 @@ require "kemal"
 require "http/client"
 require "json"
 require "jennifer"
-require "../models/travel_plan.model"
-require "../models/rel_travel_plans_travel_stops.model"
 
-require "../entities/TravelPlans/**"
-require "../entities/RickAndMorty/**"
+require "../models/TravelPlans.model"
+require "../models/RelTravelPlansTravelStops.model"
+
+require "../entities/**"
+require "../actions/**"
 
 module UserRoutes
   post "/travel_plans" do |env|
@@ -47,54 +48,61 @@ module UserRoutes
   end
 
   get "/travel_plans" do |env|
-    optimize = env.params.query["optimize"]?
-    expand = env.params.query["expand"]?
+    # Cast String as Bool
+    optimise = env.params.query["optimize"] == "true"
+    expand = env.params.query["expand"] == "true"
 
-    constructed_travel_plans : Array(ConstructedTravelPlan)  = GetTravelPlansResponseConstructor
-      .get_all_constructed_travel_plans()
+    # Get TravelPlans from DB and construct them to ConstructedTravelPlan objects
+    constructed_travel_plans : Array(ConstructedTravelPlan) =
+      GetTravelPlansResponseConstructor
+        .get_all_constructed_travel_plans()
+    puts "is false #{constructed_travel_plans.empty?}"
 
-    puts constructed_travel_plans
+    if constructed_travel_plans.empty? || (!optimise && !expand)
+      env.response.content_type = "application/json"
+      env.response.status_code = 200
+  
+      next constructed_travel_plans.to_json
+    end
 
-    # if optimize || expand
-    #   rick_and_morty_api_response = HTTP::Client
-    #     .get("https://rickandmortyapi.com/api/location/#{travel_stops.join(",")}")
+    travel_stops =
+      GetTravelPlansResponseConstructor
+        .get_all_unique_travel_stops_ids(
+          constructed_travel_plans
+      )
 
-    #   locations_arr = JSON.parse(rick_and_morty_api_response.body).as_a
-      
-    #   # if optimize
-    #   #   constructed_response = constructed_response.map do |travel|
-    #   #     new_travel_stops = travel["travel_stops"].map do |travel_stop|
-    #   #       location = locations_arr.find { |location| location["id"] == travel_stop }
-            
-    #   #     end
-    #   #     { "id": travel["id"], "travel_stops": new_travel_stops }
-    #   #   end
-    #   # end
-      
-    #   # if expand
-    #   #   constructed_response = constructed_response.map do |travel|
-    #   #     new_travel_stops = travel["travel_stops"].map do |travel_stop|
-    #   #       location = locations_arr.find { |location| location["id"] == travel_stop }
-    #   #       if location
-    #   #         {
-    #   #           "id": location["id"],
-    #   #           "name": location["name"],
-    #   #           "type": location["type"],
-    #   #           "dimension": location["dimension"],
-    #   #         }
-    #   #       else
-    #   #         travel_stop
-    #   #       end
-    #   #     end
-    #   #     { "id": travel["id"], "travel_stops": new_travel_stops }
-    #   #   end
+    graph_ql_query = RickAndMortyApiClient.new(travel_stops)
+    response : JSON::Any = graph_ql_query.execute()
+    
+    locations : Array(Location) = response["data"]["locationsByIds"]
+      .as_a.map { |location| Location.from_json(location.to_json) }
 
-    #   # end
-    # end
+    simplified_locations : Array(SimplifiedLocation) = LocationSimplificator
+      .simplify(locations)
 
-    # env.response.content_type = "application/json"
-    # env.response.status_code = 200
+    if optimise
+      optimised_locations :
+        Array(SimplifiedLocation) =
+          LocationOptimiser
+            .optimise(simplified_locations)
 
-    # constructed_response.to_json
+      simplified_locations = optimised_locations
+    end
+
+    expand_and_or_optimised_constructed_travel_plans :
+      Array(
+        ConstructedTravelPlan |
+        ConstructedExpandedTravelPlan
+      ) =
+          TravelPlanOptimiser.construct_travel_plans(
+            expand,
+            constructed_travel_plans,
+            simplified_locations
+          )
+
+    env.response.content_type = "application/json"
+    env.response.status_code = 200
+
+    next expand_and_or_optimised_constructed_travel_plans.to_json
   end
 end
