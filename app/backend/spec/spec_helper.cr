@@ -2,7 +2,11 @@ require "spec-kemal"
 require "spec"
 require "../config/config.cr"
 require "../src/app"
-require "./mocks/travel.mock.cr"
+require "../src/models/TravelPlans.model"
+require "../src/models/RelTravelPlansTravelStops.model"
+require "./mocks/travel_plans/travel.mock"
+require "./mocks/travel_plans/expanded_travel.mock"
+require "./Helper.entity"
 
 Process.run("crystal", ["sam.cr", "setup_test"])
 
