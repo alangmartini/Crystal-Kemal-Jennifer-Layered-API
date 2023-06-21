@@ -106,15 +106,11 @@ module TravelPlansRoute
       travel_stops.each_with_index do |travel_stop, index|
         value = travel_stop.is_a?(Symbol) ? travel_stop.to_s.to_i32? : travel_stop.as_i?
         
-        t = RelTravelPlansTravelStops.where {
-          _travel_plan_id == id &&
-          _travel_stop_id == travel_stops_travel_plan[index]
-        }.to_json
-        
-        RelTravelPlansTravelStops.where {
-          _travel_plan_id == id &&
-          _travel_stop_id == travel_stops_travel_plan[index]
-         }.update(travel_stop_id: value)
+      
+        RelTravelPlansTravelStops
+          .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
+          .update(travel_stop_id: value)
+
         
       end
     end
@@ -126,6 +122,52 @@ module TravelPlansRoute
     "id": id.to_i,
     "travel_stops": travel_stops
     }.to_json
+  end
+
+  delete "/travel_plans/:id" do |env|
+    id = env.params.url["id"]
+
+    if !id
+      env.response.content_type = "application/json"
+      env.response.status_code = 404
+
+      next {
+        message: "No ID provided",
+        status_code: 400
+      }
+    end
+
+    travel_plan = GetTravelPlansResponseConstructor
+      .get_raw_travel_plan_from_db_by_id(id).first
+
+    if !travel_plan
+      env.response.content_type = "application/json"
+      env.response.status_code = 404
+
+      next {
+        message: "No TravelPlan with ID #{id} found",
+        status_code: 404
+      }
+    end
+
+    travel_stops_travel_plan = GetTravelPlansResponseConstructor
+      .get_travel_stops_from_db(travel_plan)
+
+    # Starts a transaction
+    Jennifer::Adapter.default_adapter.transaction do |tx|
+      travel_stops_travel_plan.each_with_index do |travel_stop, index|
+        RelTravelPlansTravelStops
+        .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
+        .delete
+      end
+
+      TravelPlans.where {
+        _id == id
+      }.delete
+    end
+
+    env.response.content_type = "application/json"
+    env.response.status_code = 204
   end
 
   get "/travel_plans" do |env|
@@ -210,7 +252,7 @@ module TravelPlansRoute
         next {
           message: "No ID provided",
           status_code: 400
-        }
+        }.to_json
       end
 
       constructed_travel_plan : Array(ConstructedTravelPlan) =
@@ -218,12 +260,13 @@ module TravelPlansRoute
           .get_by_id_constructed_travel_plans(id)
       
       if constructed_travel_plan.size == 0
+        puts "new hero"
         env.response.content_type = "application/json"
         env.response.status_code = 404
   
         next {
-          "message" => "Travel plan not found",
-          "status_code" => 404
+          message: "No travel plans found for given ID",
+          status_code: 404
         }.to_json
       end
 
@@ -279,6 +322,7 @@ module TravelPlansRoute
         .to_json
 
     rescue e
+      puts "what"
       env.response.content_type = "application/json"
       env.response.status_code = 500
 
