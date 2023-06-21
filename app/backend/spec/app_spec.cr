@@ -80,7 +80,7 @@ require "./spec_helper"
       expected_response = 
         {
           "id": 7,
-          "travel_stops": [19, 9, 2, 11, 7]
+          "travel_stops": [2, 7, 9, 11, 19]
         }.to_json
       Helper.check_response(expected_response, 200)
     end
