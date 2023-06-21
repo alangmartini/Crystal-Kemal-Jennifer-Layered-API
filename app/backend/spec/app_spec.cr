@@ -142,5 +142,16 @@ require "./spec_helper"
       Helper.check_response(TravelData::PUT_UPDATED_TRAVEL_MOCK.to_json, 200)
     end
 
-    
+    it "DELETE /travel_plans/:id: deletes a Travel Plan" do
+      Helper.create_travel_plan() # creates with CREATE_NEW_TRAVEL_MOCK_1 body
+
+      delete "/travel_plans/12", headers: Helper.create_headers
+
+      response.status_code.should eq 204
+      get "/travel_plans", headers: Helper.create_headers
+
+      response.body.includes?(TravelData::DELETE_CREATED_TRAVEL_MOCK.to_json).should eq false
+    end
+
+
   end

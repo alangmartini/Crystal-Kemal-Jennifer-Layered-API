@@ -19,4 +19,6 @@ module TravelData
 
   PUT_UPDATED_TRAVEL_MOCK = { "id": 11, "travel_stops": [10, 3] }
 
+  DELETE_CREATED_TRAVEL_MOCK = { "id": 12, "travel_stops": [1, 2]}
+
 end
