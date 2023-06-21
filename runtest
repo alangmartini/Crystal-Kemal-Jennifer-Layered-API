@@ -55,7 +55,9 @@ loop do
   break if client.get("/travel_plans").success?
   abort("Couldn't connect to API on port 3000.") if try == 120
   try += 1
-rescue IO::EOFError
+# Small fix since the error is just IO::Error
+# and not IO::EOFError
+rescue IO::Error
 end
 
 puts "Successfully reached API."
