@@ -6,8 +6,6 @@ class GetTravelPlansResponseConstructor
     # In Jennifer, .all only refers to a query,
     # needing thus .to_json to execute it.
     result = TravelPlans.all.to_json
-    puts result
-    puts typeof(result)
     raw_travel_plans : Array(RawTravelPlan) = JSON
       .parse(result).as_a
       .map { |row| RawTravelPlan.from_json(row.to_json) }
