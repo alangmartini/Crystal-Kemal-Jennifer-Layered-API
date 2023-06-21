@@ -128,4 +128,17 @@ require "./spec_helper"
         }.to_json
       Helper.check_response(expected_response, 200)
     end
+
+    it "PUT /travel_plans/:id: update a Travel Plan" do
+      Helper.create_travel_plan() # creates with CREATE_NEW_TRAVEL_MOCK_1 body
+
+      body = TravelData::CREATE_NEW_TRAVEL_MOCK_2.to_json
+      put "/travel_plans/11", headers: Helper.create_headers, body: body
+
+      Helper.check_response(TravelData::PUT_UPDATED_TRAVEL_MOCK.to_json, 200)
+
+      get "/travel_plans/11", headers: Helper.create_headers
+
+      Helper.check_response(TravelData::PUT_UPDATED_TRAVEL_MOCK.to_json, 200)
+    end
   end

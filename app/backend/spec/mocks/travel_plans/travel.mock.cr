@@ -17,4 +17,6 @@ module TravelData
 
   GET_CREATED_TRAVEL_MOCK_2 = { "id": 3, "travel_stops": [10, 3] }
 
+  PUT_UPDATED_TRAVEL_MOCK = { "id": 11, "travel_stops": [10, 3] }
+
 end
