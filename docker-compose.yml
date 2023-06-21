@@ -24,15 +24,18 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     ports:
       - "5433:3306"
-    
   api:
     build: ./app/backend
     ports:
       - "3000:3000"
     depends_on:
       - db
-    # Dev
     volumes:
       - ./app/backend:/app
     tty: true
     stdin_open: true
+    # If TEST=true is passed with docker-compose up, runs
+    # test spec. Else run server.
+    command: sh -c 'if [ "$${TEST}" = "true" ]; then crystal sam.cr spec; else crystal run src/app.cr; fi'
+    environment:
+      TEST: ${TEST}
