@@ -73,4 +73,59 @@ require "./spec_helper"
       ].to_json
       Helper.check_response(expected_response, 200)
     end
+
+    it "GET /travel_plans/:id: retrieve a travel plan by id, no query" do
+      Helper.create_travel_plans_with_ids([2, 7, 9, 11, 19])
+      get "/travel_plans/7", headers: Helper.create_headers
+      expected_response = 
+        {
+          "id": 7,
+          "travel_stops": [19, 9, 2, 11, 7]
+        }.to_json
+      Helper.check_response(expected_response, 200)
+    end
+
+    it "GET /travel_plans/:id: retrieve a travel plan by id, optimised" do
+      Helper.create_travel_plans_with_ids([2, 7, 9, 11, 19])
+      get "/travel_plans/8?optimize=true", headers: Helper.create_headers
+      expected_response = 
+        {
+          "id": 8,
+          "travel_stops": [19, 9, 2, 11, 7]
+        }.to_json
+      Helper.check_response(expected_response, 200)
+    end
+  
+    it "GET /travel_plans/:id: retrieve a travel plan by id, expanded" do
+      Helper.create_travel_plans_with_ids([2, 3, 19, 20])
+      get "/travel_plans/9?expand=true", headers: Helper.create_headers
+      expected_response = 
+        {
+          "id": 9,
+          "travel_stops": [
+            ExpandedLocationsMocks::DIMENSION_2,
+            ExpandedLocationsMocks::DIMENSION_3,
+            ExpandedLocationsMocks::DIMENSION_19,
+            ExpandedLocationsMocks::DIMENSION_20,
+          ]
+        }.to_json
+      Helper.check_response(expected_response, 200)
+    end
+  
+    it "GET /travel_plans/:id: retrieve a travel plan by id, expanded and optimised" do
+      Helper.create_travel_plans_with_ids([2, 7, 9, 11, 19])
+      get "/travel_plans/10?expand=true&optimize=true", headers: Helper.create_headers
+      expected_response = 
+        {
+          "id": 10,
+          "travel_stops": [
+            ExpandedLocationsMocks::DIMENSION_19,
+            ExpandedLocationsMocks::DIMENSION_9,
+            ExpandedLocationsMocks::DIMENSION_2,
+            ExpandedLocationsMocks::DIMENSION_11,
+            ExpandedLocationsMocks::DIMENSION_7,
+          ]
+        }.to_json
+      Helper.check_response(expected_response, 200)
+    end
   end
