@@ -5,4 +5,4 @@ COPY ./ /app
 
 RUN shards install
 
-# CMD crystal run src/app.cr
+CMD crystal run src/app.cr
