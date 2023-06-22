@@ -1,22 +1,20 @@
 version: '3'
 services:
-  db:
+  db_spec:
     image: mysql:8.0
     env_file:
-      - ./env-db/.env
+      - ./env-spec-db/.env
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
     ports:
-      - "3306:3306"
+      - "5433:3306"
   api:
     build: ./app/backend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
     volumes:
       - ./app/backend:/app
     tty: true
     stdin_open: true
-    command: crystal run src/app.cr
+    depends_on:
+      - db_spec
+    command: crystal sam.cr spec
