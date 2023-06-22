@@ -17,4 +17,14 @@ task "setup_test" do
   system "crystal sam.cr db:setup"
 end
 
+desc "Run some benchmarking tests"
+task "benchmark" do
+  system "crystal run --release ./benchmark/run.cr"
+end
+
+desc "Run some benchmarking tests with memory data"
+task "benchmark memory" do
+  system "/usr/bin/time -v crystal run --release ./benchmark/run.cr"
+end
+
 Sam.help
