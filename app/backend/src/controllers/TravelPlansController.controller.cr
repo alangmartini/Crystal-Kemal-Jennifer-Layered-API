@@ -1,5 +1,6 @@
 require "../services/TravelPlansService.service"
 require "../entities/TravelPlans/TravelStopsJSON.entity"
+require "./helper/HelperTravelPlansController.helper"
 
 class TravelPlansController
   @TravelPlansService : AbstractTravelPlanService
@@ -9,94 +10,54 @@ class TravelPlansController
     @TravelPlansService = TravelPlansService.new()
   end
 
-  # Reads the Body from a `HTTP::Request` or any IO.
-  # JSON.parse() is a more convenient (and faster) way,
-  # but reading in chunks is more memory efficient for long bodies.
-  # Also allows to handle as a string instead of JSON::Any.
-  def read_travel_stops_from_body_with_JSONparse(
-    env_request_body : IO
-    )
-      data = JSON.parse(env_request_body)
-      
-
-      travel_stops = data["travel_stops"].as_a.map do |int|
-        int.as_i
-      end
-
-      travel_stops
-  end
-
-  def read_travel_stops_from_body_with_unserializer(
-    env_request_body : IO
-    ) : TravelStopsJSON
-      TravelStopsJSON.from_json(env_request_body)
-  end
-
-  #
-  def read_travel_stops_from_body_with_buffer(
-    env_request_body : IO
-    ) : Array(Int32) | NamedTuple(message: String)
-    # Read the data in chunks to avoid using too much memory at once.
-      buffer = Bytes.new(8192) # 8 KB buffer
-      data = ""
-    
-      while (read_bytes = env_request_body.read(buffer)) > 0
-        data += String.new(buffer[0, read_bytes])
-      end
-
-      travel_stops_json = NamedTuple(travel_stops: Array(Int32))
-      travel_stops_json.from_json(data)["travel_stops"]
-  end
-
-  # :nodoc:
-  def set_response_json(message : String, status_code : Int32, env : HTTP::Server::Context)
-    env.response.content_type = "application/json"
-    env.response.status_code = status_code
-
-    {
-      message: message,
-      status_code: status_code
-    }.to_json
-  end
 
   # Create new TravelPlan. Used in POST /travel_plans
+  #
+  # Uses Content-Length header to check for Body.
+  # If Content-Length is 0, then it returns a 400 Bad Request
+  #
+  # Instantiate and calls `TravelPlansService` methods
+  #
+  # @param env : HTTP::Server::Context
   def create_travel_plan(env : HTTP::Server::Context)
-    if env.request.headers["Content-Length"] == "0"
-      return set_response_json(
+    if env.request.body.nil?
+      return HelperTravelPlansController
+        .set_response_json(
           "Travel Stops are required", 400, env
         )
     end
 
-    travel_stops_body : IO | Nil = env.request.body
+    travel_stops_body : IO =
+      env.request.body.not_nil!
 
-    if travel_stops_body
-      # You can use any of the following methods to read the body
-      # travel_stops = travel_stops_from_body_with_buffer
-      # read_travel_stops_from_body_with_JSONparse
-
-      # Although benchmarks show that JSONParse its the fastest method,
-      # this method returns a TravelStopsJSON object,
-      # that is more clean code compliant.
-      # For an 10milion big array:
-      # JSONParse: 1.5s, buffer: 4.94s, unserializer: 1.09s
-      
-      travel_stops : TravelStopsJSON =
-        read_travel_stops_from_body_with_unserializer(
-          travel_stops_body
-      )
-    end
-
-    # puts typeof(travel_stops_body_2.to_s)
-    # puts JSON.parse(travel_stops_body_2 || "oloco")
-    # puts travel_stops_body_2.to_s
+    travel_stops : TravelStopsJSON =
+        HelperTravelPlansController::BodyParser
+          .read_travel_stops_from_body_with_unserializer(
+            travel_stops_body
+          )
 
     begin
-      # created_travel_plan = @TravelPlansService
-      #   .create_travel_plan(travel_stops_body)
-      # return created_travel_plan
+      # created_travel_plan : ConstructedTravelPlan =
+      #   @TravelPlansService
+      #     .create_travel_plan(travel_stops)
+
+      created_travel_plan =
+        @TravelPlansService
+          .create_travel_plan(travel_stops)
+
+      HelperTravelPlansController
+        .set_response_json(
+          "", 201, env
+        )
+
+      return created_travel_plan.to_json
     rescue e
+      puts e
       puts e.message
-      return set_response_json("error", 400, env)
+      return HelperTravelPlansController
+        .set_response_json("error", 400, env)
     end
   end
+
+  
 end
