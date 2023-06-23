@@ -1,8 +1,8 @@
 class ConstructedTravelPlan
-  property id : Int64
-  property travel_stops : Array(Int64)
+  property id : Int32
+  property travel_stops : Array(Int32)
 
-  def initialize(@id : Int64, @travel_stops : Array(Int64))
+  def initialize(@id : Int32, @travel_stops : Array(Int32))
   end
 
   # Method for returning it as a response for requisitions
