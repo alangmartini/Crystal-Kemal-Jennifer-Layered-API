@@ -2,12 +2,15 @@ require "../services/TravelPlansService.service"
 require "../entities/TravelPlans/TravelStopsJSON.entity"
 require "./helper/HelperTravelPlansController.helper"
 
+# Controller for TravelPlans routes
+#
+# Instantiate and calls `TravelPlansService` methods
 class TravelPlansController
-  @TravelPlansService : AbstractTravelPlanService
+  @TravelPlansService : TravelPlansService::AbstractTravelPlanService
 
   # Initialize the correspondet Service to utilize
   def initialize
-    @TravelPlansService = TravelPlansService.new()
+    @TravelPlansService = TravelPlansService::Service.new()
   end
 
 
@@ -16,7 +19,6 @@ class TravelPlansController
   # Uses Content-Length header to check for Body.
   # If Content-Length is 0, then it returns a 400 Bad Request
   #
-  # Instantiate and calls `TravelPlansService` methods
   #
   # @param env : HTTP::Server::Context
   def create_travel_plan(env : HTTP::Server::Context)
@@ -47,11 +49,46 @@ class TravelPlansController
         )
 
       return created_travel_plan.to_json
+    rescue e : ArgumentError
+      return HelperTravelPlansController
+        .set_response_json(
+          e.message.not_nil!, 400, env
+        )
     rescue e
       return HelperTravelPlansController
-        .set_response_json(e.message.to_json, 400, env)
+        .set_response_json(e.message.to_json, 500, env)
     end
   end
 
+  # Get all TravelPlans. Used in GET /travel_plans
+  #
+  # @param env : HTTP::Server::Context
+  def get_all_travel_plans(env : HTTP::Server::Context)
+    begin
+      # Cast String as Bool
+      optimise = env.params.query["optimize"]? == "true"
+      expand = env.params.query["expand"]? == "true"
+      
+      all_travel_plans : Array(
+        ConstructedTravelPlan |
+        ConstructedExpandedTravelPlan
+      ) = @TravelPlansService
+            .get_all_travel_plans(optimise, expand)
+
+      HelperTravelPlansController
+        .set_response_json("", 200, env)
+
+      return all_travel_plans.to_json
+    
+    rescue e : ArgumentError
+      return HelperTravelPlansController
+        .set_response_json(
+          e.message.not_nil!, 400, env
+        )
+    rescue e
+      return HelperTravelPlansController
+        .set_response_json(e.message.to_json, 500, env)
+    end
+  end
   
 end
