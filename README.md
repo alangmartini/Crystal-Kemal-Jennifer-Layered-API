@@ -88,3 +88,9 @@ The project also tries to implement OOP with SOLIDs principles. Most
 "things" in the project are either Entities, which represent a real
 entity, or Actions, which represent an action that can be performed.
 
+## Importations
+
+Each module or class has its own importations declared at the top of the its files.
+
+Although it seems like a effort duplication, it facilitates
+unit testing. It also makes it easier to know which modules are being used.
