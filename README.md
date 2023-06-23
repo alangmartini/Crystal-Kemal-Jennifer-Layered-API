@@ -67,3 +67,24 @@ crystal run runtest
 ```
 
 Probably it was a breaking change on Crystal 0.35.1, or other versions.
+
+# Architecture
+
+Inspired by Single Responsability Principle and Separation of Concerns,
+the project follows a Layered Architecture, where each layer has its own
+responsability and is not aware of the other layers.
+
+Where:
+
+Routes: Responsible for defining routes of certain domain and invoking
+    appropriate controllers.
+Controllers: Responsible for handling requests and responses.
+Services: Responsible for handling business logic.
+Models: Responsible for retrieving data from DB.
+
+## OOP
+
+The project also tries to implement OOP with SOLIDs principles. Most
+"things" in the project are either Entities, which represent a real
+entity, or Actions, which represent an action that can be performed.
+
