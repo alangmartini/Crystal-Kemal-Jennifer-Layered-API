@@ -1,9 +1,9 @@
 require "../../entities/TravelPlans/RawTravelPlan.entity"
-require "../../entities/model/TravelPlans.model"
-require "../../entities/model/RelTravelPlansTravelStops.model"
+require "../../models/TravelPlans.model"
+require "../../models/RelTravelPlansTravelStops.model"
  
 module TravelPlansService
-  # Do operations necessary to retrieve `TravelPlans` from DB and construct
+  # Contain operations necessary to retrieve `TravelPlans` from DB and construct
   # it to a `ConstructedTravelPlan` object
   #
   # A TravelPlan is stored in two trables, `TravelPlans` and `RelTravelPlansTravelStops`.
@@ -33,14 +33,15 @@ module TravelPlansService
           .where { _travel_plan_id == raw_travel_plan.id }
           .to_json(only: %w[travel_stop_id])
 
-      travel_stops_ids : Array(Int64) = JSON
+      travel_stops_ids : Array(Int32) = JSON
         .parse(travel_stops_id)
         .as_a.map { |row| row["travel_stop_id"].as_i }
 
       travel_stops_ids
     end
 
-    def self.construct_travel_plans(raw_travel_plans : Array(RawTravelPlan)) : Array(ConstructedTravelPlan)
+    # Construct RawTravelPlan and TravelStops to a `ConstructedTravelPlan`
+    def self.construct_travel_plans_from_raw(raw_travel_plans : Array(RawTravelPlan)) : Array(ConstructedTravelPlan)
       raw_travel_plans
         .map do |raw_travel_plan|
           travel_stops_ids = self.get_travel_stops_from_db(raw_travel_plan)
@@ -51,5 +52,29 @@ module TravelPlansService
           )
         end
     end
+
+    # Join `RawTravelPlan` as its TravelStops and construct them to `ConstructedTravelPlan` objects
+    def self.get_all_constructed_travel_plans() : Array(ConstructedTravelPlan)
+      raw_travel_plans = self.get_all_raw_travel_plans_from_db()
+
+      self.construct_travel_plans_from_raw(raw_travel_plans)
+    end
+
+    # Extract all unique ids from an array of `ConstructedTravelPlan`
+    #
+    # Used in `TravelStopsService::Service` to build and array
+    # that will be served to fetch locations from Rick And Morty API.
+
+    def self.get_all_unique_travel_stops_ids(
+      construct_travel_plans : Array(ConstructedTravelPlan)
+    ) : Array(Int32)
+      travel_stops = [] of Int32
+      construct_travel_plans
+        .each { |a| a.travel_stops.each { |b| travel_stops << b } }
+
+      travel_stops = travel_stops.uniq
+
+      travel_stops
+    end 
   end
 end
