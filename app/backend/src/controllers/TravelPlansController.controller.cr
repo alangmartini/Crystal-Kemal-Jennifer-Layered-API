@@ -20,26 +20,22 @@ class TravelPlansController
   #
   # @param env : HTTP::Server::Context
   def create_travel_plan(env : HTTP::Server::Context)
-    if env.request.body.nil?
-      return HelperTravelPlansController
-        .set_response_json(
-          "Travel Stops are required", 400, env
-        )
-    end
-
-    travel_stops_body : IO =
-      env.request.body.not_nil!
-
-    travel_stops : TravelStopsJSON =
-        HelperTravelPlansController::BodyParser
-          .read_travel_stops_from_body_with_unserializer(
-            travel_stops_body
-          )
-
     begin
-      # created_travel_plan : ConstructedTravelPlan =
-      #   @TravelPlansService
-      #     .create_travel_plan(travel_stops)
+      if env.request.body.nil?
+        return HelperTravelPlansController
+          .set_response_json(
+            "Travel Stops are required", 400, env
+          )
+      end
+
+      travel_stops_body : IO =
+        env.request.body.not_nil!
+
+      travel_stops : TravelStopsJSON =
+          HelperTravelPlansController::BodyParser
+            .read_travel_stops_from_body_with_unserializer(
+              travel_stops_body
+            )
 
       created_travel_plan =
         @TravelPlansService
@@ -52,10 +48,8 @@ class TravelPlansController
 
       return created_travel_plan.to_json
     rescue e
-      puts e
-      puts e.message
       return HelperTravelPlansController
-        .set_response_json("error", 400, env)
+        .set_response_json(e.message.to_json, 400, env)
     end
   end
 
