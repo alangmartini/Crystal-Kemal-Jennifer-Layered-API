@@ -94,3 +94,11 @@ Each module or class has its own importations declared at the top of the its fil
 
 Although it seems like a effort duplication, it facilitates
 unit testing. It also makes it easier to know which modules are being used.
+
+## Why Class or Module
+
+Found empiricately that using modules
+facilitates at lot the code organization,
+and allow for a better structured docs.
+
+Con is that the variable and methods names get pretty large.
