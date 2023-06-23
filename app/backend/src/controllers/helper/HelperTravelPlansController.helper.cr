@@ -58,6 +58,13 @@ module HelperTravelPlansController
     # set_response_json("message", 200, env)
     # ```
     #
+    # If the controller returns it, the message passed
+    # will be set as the response body. Else it will
+    # just set content_type and status_code.
+    # 
+    # This was thinked as a expansible method, so
+    # with room to set more headers, cookies, etc.
+    #
     # **note:** env is a `HTTP::Server::Context` object
     # served by `Kemal` on routes.
     def self.set_response_json(message : String, status_code : Int32, env : HTTP::Server::Context)
