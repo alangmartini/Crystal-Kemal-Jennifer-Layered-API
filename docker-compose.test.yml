@@ -13,6 +13,8 @@ services:
     build: ./app/backend
     volumes:
       - ./app/backend:/app
+    environment:
+      - CRYSTAL_PATH=/app/src
     tty: true
     stdin_open: true
     depends_on:

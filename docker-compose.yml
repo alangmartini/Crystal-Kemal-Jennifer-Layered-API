@@ -17,6 +17,8 @@ services:
       - db
     volumes:
       - ./app/backend:/app
+    environment:
+      - CRYSTAL_PATH=/app/src
     tty: true
     stdin_open: true
-    command: crystal run src/app.cr
+    # command: crystal run src/app.cr
