@@ -1,6 +1,5 @@
-require "../../entities/RickAndMorty/RickAndMortyLocation.entity"
-require "../../entities/RickAndMorty/RickAndMortyLocation.entity"
-require "../../entities/RickAndMorty/RickAndMortySimplifiedLocation.entity"
+require "/entities/RickAndMorty/entities/Location.entity"
+require "/entities/RickAndMorty/entities/SimplifiedLocation.entity"
 
 
 module TravelPlansService
@@ -28,9 +27,7 @@ module TravelPlansService
     
       # Do the simplification of the `Location` entity to a
       # `SimplifiedLocation` entity
-      def self.simplify(
-        arr_of_locations : Array(Location)
-      )
+      def self.simplify(arr_of_locations : Array(Location))
         # Copy to new_locations the content in locations
         # while emptying the memory at the same time.
         # This allows to do a map without holding two copies
@@ -96,6 +93,6 @@ module TravelPlansService
     
         sorted_locations_only
       end
-    end    
+    end 
   end
 end
