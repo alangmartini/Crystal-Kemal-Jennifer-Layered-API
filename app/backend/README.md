@@ -1,27 +1,66 @@
-# teste
+# rick-and-morty-api
 
-TODO: Write a description here
+API build for a Code Challenge from a job posting. It uses
+[crystal](https://crystal-lang.org/), a programming language with ruby-like sintax
+and performance close to C.
+
+# Travel Plans API
+
+This API allows you to manage travel plans. The following endpoints are available:
+
+## Endpoints
+
+### `GET /travel_plans`
+
+Retrieves a list of all travel plans.
+
+### `GET /travel_plans/:id`
+
+Retrieves a specific travel plan. You can provide the following options as query parameters:
+
+- `optimise=true`: Optimises the travel stops according to the following rules:
+  1. Every stop from the same dimension must be grouped.
+  2. Inside a same dimension, the stops must be ordered in ascending order of popularity.
+  3. If the popularity is the same, then order by name.
+  4. The order of visit of the dimensions is defined by the average of their total populations.
+
+- `expand=true`: Brings information on travel stop name, dimension, and type.
+
+### `POST /travel_plans`
+
+Creates a new travel plan.
+
+### `PUT /travel_plans/:id`
+
+Updates a specific travel plan.
+
+### `DELETE /travel_plans/:id`
+
+Deletes a specific travel plan.
+
+
+## DB
+
+The project uses a MySQL database, with [Jennifer](https://github.com/imdrasil/jennifer.cr) as ORM
+
+![](../misc/mysql_table.png)
+![](misc/mysql_table.png)
 
 ## Installation
 
-TODO: Write installation instructions here
+Check main README.md
 
 ## Usage
 
-TODO: Write usage instructions here
+Check main README.md
 
 ## Development
 
-TODO: Write development instructions here
-
-## Contributing
-
-1. Fork it (<https://github.com/your-github-user/teste/fork>)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+Check main README.md
 
 ## Contributors
 
-- [gmaralan](https://github.com/your-github-user) - creator and maintainer
+- #### Alan Galvão Martini
+  1. [Linkedin](https://www.linkedin.com/in/alangmartini/)
+  2. [Github](https://github.com/alangmartini/)
+  3. [Email](gmartinialan@gmail.com)
