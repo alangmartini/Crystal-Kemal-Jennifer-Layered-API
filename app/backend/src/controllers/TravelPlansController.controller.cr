@@ -71,6 +71,42 @@ module TravelPlansRoute
         end
       end
 
+      # Update a TravelPlan. Used in PUT /travel_plans/:id
+      def update_travel_plan(env : HTTP::Server::Context)
+        begin
+          id = env.params.url["id"]
+
+          if id.nil?
+            return Helper.set_response_json(
+                "No ID provided", 400, env
+              )        
+          end
+
+          travel_stops : TravelStopsJSON = Helper::BodyParser
+            .get_travel_stops_from_body(env)
+
+          if travel_stops.nil?
+            return Helper.set_response_json(
+                "Travel Stops are required", 400, env
+              )
+          end
+
+          travel_plan
+
+          
+
+        rescue e : ArgumentError
+          return Helper
+            .set_response_json(
+              e.message.not_nil!, 400, env
+            )
+        rescue e
+          return Helper
+            .set_response_json(e.message.to_json, 500, env)
+        end
+
+      end
+
       # Get all TravelPlans. Used in GET /travel_plans
       #
       # @param env : HTTP::Server::Context

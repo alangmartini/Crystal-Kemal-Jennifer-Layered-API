@@ -53,6 +53,25 @@ module TravelPlansRoute
             travel_stops_json = NamedTuple(travel_stops: Array(Int32))
             travel_stops_json.from_json(data)["travel_stops"]
         end
+
+        # Read the body to `TravelStopsJSON` object.
+        def self.get_travel_stops_from_body(
+            env : HTTP::Server::Context
+          ) : TravelStopsJSON
+          if env.request.body.nil?
+            return Nil
+          end
+
+          travel_stops_body : IO =
+            env.request.body.not_nil!
+
+          travel_stops : TravelStopsJSON =
+              self.read_travel_stops_from_body_with_unserializer(
+                  travel_stops_body
+                )
+
+          travel_stops
+        end
       end
     end
   end
