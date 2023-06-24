@@ -82,19 +82,24 @@ module TravelPlansRoute
               )        
           end
 
-          travel_stops : TravelStopsJSON = Helper::BodyParser
+          travel_stops_json : TravelStopsJSON = Helper::BodyParser
             .get_travel_stops_from_body(env)
 
-          if travel_stops.nil?
+          if travel_stops_json.nil?
             return Helper.set_response_json(
                 "Travel Stops are required", 400, env
               )
           end
 
-          travel_plan
+          updated_travel_plan = @TravelPlansService
+            .update_travel_plan(id, travel_stops_json)
+            
+          Helper
+            .set_response_json(
+              "", 200, env
+            )
 
-          
-
+          return updated_travel_plan.to_json
         rescue e : ArgumentError
           return Helper
             .set_response_json(

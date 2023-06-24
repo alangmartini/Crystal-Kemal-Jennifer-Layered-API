@@ -44,7 +44,7 @@ module TravelPlansRoute
             .from_json(created_travel_plans.to_json)
 
           # With the id in hands, we can now create the travel stops
-          travel_stops = create_travel_stops(
+          travel_stops = Helper::ManageTravelStops.create_travel_stops(
             travel_stops_json,
             raw_travel_plan.id
           )
@@ -57,32 +57,43 @@ module TravelPlansRoute
           constructed_travel_plan
         end
 
-        # For each travel_stop supplied, create a new RelTravelPlansTravelStops
-        # in DB, relationing it to the TravelPlan
-        def create_travel_stops(
+        def update_travel_plan(
+          id : Int32,
           travel_stops_json : TravelStopsJSON,
-          id : Int32
-          ) : Array(Int32)
-          rel_travel_plans = [] of RelTravelPlansTravelStops
+        )
+          # We wont need a `ConstructedTravelPlan` since we only
+          # need the id to update.
+          raw_travel_plan = Helper::GetAndConstructTravelPlans
+            .get_raw_travel_plan_from_db_by_id(id)
 
-          travel_stops_json
-            .travel_stops
-            .each do |travel_stop|
-              created_travel_stop = @TravelStopsModel
-                .new({
-                  travel_plan_id: id,
-                  travel_stop_id: travel_stop
-                })
+          if raw_travel_plan.nil?
+            raise ArgumentError.new("No Travel Plan with given ID")
+          end
 
-              rel_travel_plans << created_travel_stop
+          # Starts a transaction
+          # TODO: Right now, if body has less travel stops than the
+          # travel_plan, it will generate duplicate travel_stops.
+          # To solve, its necessary to check the lenghts and delete
+          # the excessive part from the DB.
+          travel_stops : Array(Int32) = travel_stops_json.travel_stops
+
+          # TODO: take this out of service and create an appropriate class
+          # or module for transactions and other db methods.
+          Jennifer::Adapter.default_adapter.transaction do |tx|
+            travel_stops.each_with_index do |travel_stop, index|
+              value = travel_stop.is_a?(Symbol) ? travel_stop.to_s.to_i32? : travel_stop.as_i?
+              
+            
+              @TravelStopsModel
+                .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
+                .update(travel_stop_id: value)
             end
+          end
 
-          @TravelStopsModel.import(rel_travel_plans)
-
-          travel_stops = rel_travel_plans.map { |rel_travel_plan|
-            rel_travel_plan.travel_stop_id }
-
-          travel_stops  
+          return {
+            id: id,
+            travel_stops: travel_stops
+          }
         end
 
         # Get all TravelPlans in DB, optimising or expanding them

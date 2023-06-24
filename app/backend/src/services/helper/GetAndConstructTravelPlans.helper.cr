@@ -27,7 +27,20 @@ module TravelPlansRoute
 
           raw_travel_plans
         end
-        
+
+        # Get a specific `TravelPlans` from DB and construct it to `RawTravelPlan` objects
+        # Returns an array with 1 element so we can `#construct_travel_plans_from_raw` to construct it
+        # after.
+        def self.get_raw_travel_plan_from_db_by_id(id : String | Int32) : Array(RawTravelPlan)
+          result = TravelPlans.where { _id == id }.to_json
+
+          raw_travel_plans : Array(RawTravelPlan) = JSON
+            .parse(result).as_a
+            .map { |row| RawTravelPlan.from_json(row.to_json) }
+      
+          raw_travel_plans
+        end
+      
         # Get all `TravelStops` related to specific `TravelPlans` from DB
         def self.get_travel_stops_from_db(raw_travel_plan : RawTravelPlan)
           travel_stops_id =  RelTravelPlansTravelStops
