@@ -1,8 +1,10 @@
-class ConstructedExpandedTravelPlan
-  property id : Int64
+# Structuraly identical to `ConstructedExpandedTravelPlan`
+# but was made for clearer understanding of the code.
+class ConstructedOptimisedExpandedTravelPlan
+  property id : Int32
   property travel_stops : Array(ExpandedTravelStop)
 
-  def initialize(@id : Int64, @travel_stops : Array(ExpandedTravelStop))
+  def initialize(@id : Int32, @travel_stops : Array(ExpandedTravelStop))
   end
 
   def to_json(json : JSON::Builder)

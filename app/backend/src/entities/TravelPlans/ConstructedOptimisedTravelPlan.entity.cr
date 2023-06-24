@@ -1,4 +1,7 @@
-class ConstructedTravelPlan
+
+# Structuraly identical to the `ConstructedTravelPlan` class,
+# but was made for clearer understanding of the code.
+class ConstructedOptimisedTravelPlan
   property id : Int32
   property travel_stops : Array(Int32)
 
