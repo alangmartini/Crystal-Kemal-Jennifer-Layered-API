@@ -21,11 +21,11 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 
 ## **Docs as HTML**
 
+Docs are fully completed! Run command bellow outside docker and go to http://localhost:8000/docs
+
 ```bash
 python3 -m http.server
 ```
-and open http://localhost:8000/docs
-** or check a bit more down here **
 
 ## **Benchmarks**
 
@@ -67,6 +67,9 @@ crystal run runtest
 ```
 
 Probably it was a breaking change on Crystal 0.35.1, or other versions.
+
+**note:**For all commands above, if running outside docker, you need to have crystal installed and set CRYSTAL_PATH env.
+(example in docker-compose 'enviroments').
 
 # Architecture
 

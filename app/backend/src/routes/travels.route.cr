@@ -5,9 +5,17 @@ require "json"
 require "jennifer"
 
 require "/controllers/TravelPlansController.controller"
-travel_plans_controller = TravelPlansController.new()
+travel_plans_controller = TravelPlansController::Controller.new()
 
 module TravelPlansRoute
+  alias ConstructedExpandedTravelPlan = TravelPlansRoute::Entities::ConstructedExpandedTravelPlan
+  alias ConstructedOptimisedExpandedTravelPlan = TravelPlansRoute::Entities::ConstructedOptimisedExpandedTravelPlan
+  alias ConstructedOptimisedTravelPlan = TravelPlansRoute::Entities::ConstructedOptimisedTravelPlan
+  alias ConstructedTravelPlan = TravelPlansRoute::Entities::ConstructedTravelPlan
+  alias ExpandedTravelStop = TravelPlansRoute::Entities::ExpandedTravelStop
+  alias RawTravelPlan = TravelPlansRoute::Entities::RawTravelPlan
+  alias TravelStopsJSON = TravelPlansRoute::Entities::TravelStopsJSON
+  
   post "/travel_plans" do |env|
     travel_plans_controller.create_travel_plan(env)
   end

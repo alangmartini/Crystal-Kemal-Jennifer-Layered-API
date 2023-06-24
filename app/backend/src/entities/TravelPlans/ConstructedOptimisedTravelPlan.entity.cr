@@ -1,18 +1,21 @@
+module TravelPlansRoute
+  module Entities
+    # Structuraly identical to the `ConstructedTravelPlan` class,
+    # but was made for clearer understanding of the code.
+    class ConstructedOptimisedTravelPlan
+      property id : Int32
+      property travel_stops : Array(Int32)
 
-# Structuraly identical to the `ConstructedTravelPlan` class,
-# but was made for clearer understanding of the code.
-class ConstructedOptimisedTravelPlan
-  property id : Int32
-  property travel_stops : Array(Int32)
+      def initialize(@id : Int32, @travel_stops : Array(Int32))
+      end
 
-  def initialize(@id : Int32, @travel_stops : Array(Int32))
-  end
-
-  # Method for returning it as a response for requisitions
-  def to_json(json : JSON::Builder)
-    json.object do
-      json.field("id", @id)
-      json.field("travel_stops", @travel_stops)
+      # Method for returning it as a response for requisitions
+      def to_json(json : JSON::Builder)
+        json.object do
+          json.field("id", @id)
+          json.field("travel_stops", @travel_stops)
+        end
+      end
     end
   end
 end

@@ -1,8 +1,12 @@
 require "json"
 
-class TravelStopsJSON
-  include JSON::Serializable
+module TravelPlansRoute
+  module Entities
+    class TravelStopsJSON
+      include JSON::Serializable
 
-  @[JSON::Field]
-  property travel_stops : Array(Int32)
+      @[JSON::Field]
+      property travel_stops : Array(Int32)
+    end
+  end
 end
