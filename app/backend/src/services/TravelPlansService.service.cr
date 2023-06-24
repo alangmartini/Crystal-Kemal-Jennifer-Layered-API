@@ -71,22 +71,24 @@ module TravelPlansRoute
           end
 
           # Starts a transaction
-          # TODO: Right now, if body has less travel stops than the
-          # travel_plan, it will generate duplicate travel_stops.
-          # To solve, its necessary to check the lenghts and delete
-          # the excessive part from the DB.
-          travel_stops : Array(Int32) = travel_stops_json.travel_stops
+          # I decided to remove and created, even if the PK wont reset
+          # since it handles the case where the to update travel_stops
+          # don't have the same length as the current travel_stops
 
+          travel_stops : Array(Int32) = travel_stops_json.travel_stops
           # TODO: take this out of service and create an appropriate class
           # or module for transactions and other db methods.
           Jennifer::Adapter.default_adapter.transaction do |tx|
             travel_stops.each_with_index do |travel_stop, index|
-              value = travel_stop.is_a?(Symbol) ? travel_stop.to_s.to_i32? : travel_stop.as_i?
-              
+              @TravelStopsModel
+                .where { (_travel_plan_id == id) }
+                .delete()
             
               @TravelStopsModel
-                .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
-                .update(travel_stop_id: value)
+                .create({
+                  travel_plan_id: id,
+                  travel_stop_id: travel_stop
+                })
             end
           end
 

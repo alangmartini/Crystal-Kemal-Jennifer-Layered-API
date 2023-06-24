@@ -57,9 +57,9 @@ module TravelPlansRoute
         # Read the body to `TravelStopsJSON` object.
         def self.get_travel_stops_from_body(
             env : HTTP::Server::Context
-          ) : TravelStopsJSON
+          ) : TravelStopsJSON | Nil
           if env.request.body.nil?
-            return Nil
+            return nil
           end
 
           travel_stops_body : IO =

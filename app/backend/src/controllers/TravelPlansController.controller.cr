@@ -74,7 +74,7 @@ module TravelPlansRoute
       # Update a TravelPlan. Used in PUT /travel_plans/:id
       def update_travel_plan(env : HTTP::Server::Context)
         begin
-          id = env.params.url["id"]
+          id : String | Nil = env.params.url["id"]
 
           if id.nil?
             return Helper.set_response_json(
@@ -82,7 +82,7 @@ module TravelPlansRoute
               )        
           end
 
-          travel_stops_json : TravelStopsJSON = Helper::BodyParser
+          travel_stops_json : TravelStopsJSON | Nil = Helper::BodyParser
             .get_travel_stops_from_body(env)
 
           if travel_stops_json.nil?
@@ -92,8 +92,8 @@ module TravelPlansRoute
           end
 
           updated_travel_plan = @TravelPlansService
-            .update_travel_plan(id, travel_stops_json)
-            
+            .update_travel_plan(id.to_i, travel_stops_json.not_nil!)
+
           Helper
             .set_response_json(
               "", 200, env

@@ -22,122 +22,52 @@ module TravelPlansRoute
 
   put "/travel_plans/:id" do |env|
     travel_plans_controller.update_travel_plan(env)
-
-    id = env.params.url["id"]
-
-    if !id
-      env.response.content_type = "application/json"
-      env.response.status_code = 404
-
-      next {
-        message: "No ID provided",
-        status_code: 400
-      }
-    end
-
-    body = env.request.body.try &.gets_to_end
-
-    if body
-      parsed_body = JSON.parse(body)
-      travel_stops = parsed_body["travel_stops"].as_a
-    else
-      env.response.content_type = "application/json"
-      env.response.status_code = 400
-
-      next {
-        message: "No body provided",
-        status_code: 400
-      }
-    end
-
-    travel_plan = GetTravelPlansResponseConstructor
-      .get_raw_travel_plan_from_db_by_id(id).first
-
-    if !travel_plan
-      env.response.content_type = "application/json"
-      env.response.status_code = 404
-
-      next {
-        message: "No TravelPlan with ID #{id} found",
-        status_code: 404
-      }
-    end
-
-    travel_stops_travel_plan = GetTravelPlansResponseConstructor
-      .get_travel_stops_from_db(travel_plan)
-    
-
-    # Starts a transaction
-    # TODO: Right now, if body has less travel stops than the
-    # travel_plan, it will generate duplicate travel_stops.
-    # To solve, its necessary to check the lenghts and delete
-    # the excessive part from the DB.
-    Jennifer::Adapter.default_adapter.transaction do |tx|
-      travel_stops.each_with_index do |travel_stop, index|
-        value = travel_stop.is_a?(Symbol) ? travel_stop.to_s.to_i32? : travel_stop.as_i?
-        
-      
-        RelTravelPlansTravelStops
-          .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
-          .update(travel_stop_id: value)
-
-        
-      end
-    end
-    
-    env.response.content_type = "application/json"
-    env.response.status_code = 200
-
-    {
-    "id": id.to_i,
-    "travel_stops": travel_stops
-    }.to_json
   end
 
   delete "/travel_plans/:id" do |env|
-    id = env.params.url["id"]
+  #   id = env.params.url["id"]
 
-    if !id
-      env.response.content_type = "application/json"
-      env.response.status_code = 404
+  #   if !id
+  #     env.response.content_type = "application/json"
+  #     env.response.status_code = 404
 
-      next {
-        message: "No ID provided",
-        status_code: 400
-      }
-    end
+  #     next {
+  #       message: "No ID provided",
+  #       status_code: 400
+  #     }
+  #   end
 
-    travel_plan = GetTravelPlansResponseConstructor
-      .get_raw_travel_plan_from_db_by_id(id).first
+  #   travel_plan = GetTravelPlansResponseConstructor
+  #     .get_raw_travel_plan_from_db_by_id(id).first
 
-    if !travel_plan
-      env.response.content_type = "application/json"
-      env.response.status_code = 404
+  #   if !travel_plan
+  #     env.response.content_type = "application/json"
+  #     env.response.status_code = 404
 
-      next {
-        message: "No TravelPlan with ID #{id} found",
-        status_code: 404
-      }
-    end
+  #     next {
+  #       message: "No TravelPlan with ID #{id} found",
+  #       status_code: 404
+  #     }
+  #   end
 
-    travel_stops_travel_plan = GetTravelPlansResponseConstructor
-      .get_travel_stops_from_db(travel_plan)
+  #   travel_stops_travel_plan = GetTravelPlansResponseConstructor
+  #     .get_travel_stops_from_db(travel_plan)
 
-    # Starts a transaction
-    Jennifer::Adapter.default_adapter.transaction do |tx|
-      travel_stops_travel_plan.each_with_index do |travel_stop, index|
-        RelTravelPlansTravelStops
-        .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
-        .delete
-      end
+  #   # Starts a transaction
+  #   Jennifer::Adapter.default_adapter.transaction do |tx|
+  #     travel_stops_travel_plan.each_with_index do |travel_stop, index|
+  #       RelTravelPlansTravelStops
+  #       .where { (_travel_plan_id == id) & (_travel_stop_id == travel_stops_travel_plan[index]) }
+  #       .delete
+  #     end
 
-      TravelPlans.where {
-        _id == id
-      }.delete
-    end
+  #     TravelPlans.where {
+  #       _id == id
+  #     }.delete
+  #   end
 
-    env.response.content_type = "application/json"
-    env.response.status_code = 204
+  #   env.response.content_type = "application/json"
+  #   env.response.status_code = 204
   end
 
   get "/travel_plans" do |env|
