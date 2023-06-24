@@ -10,7 +10,7 @@ shards:
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
-    version: 0.11.0
+    version: 0.12.0
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
@@ -34,7 +34,7 @@ shards:
 
   mysql:
     git: https://github.com/crystal-lang/crystal-mysql.git
-    version: 0.14.0
+    version: 0.15.0
 
   radix:
     git: https://github.com/luislavena/radix.git
