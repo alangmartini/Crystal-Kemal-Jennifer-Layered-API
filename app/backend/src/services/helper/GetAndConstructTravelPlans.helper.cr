@@ -68,9 +68,21 @@ module TravelPlansRoute
             end
         end
 
-        # Join `RawTravelPlan` as its TravelStops and construct them to `ConstructedTravelPlan` objects
+        # Join `RawTravelPlan` with its TravelStops and construct them to `ConstructedTravelPlan` objects
         def self.get_all_constructed_travel_plans() : Array(ConstructedTravelPlan)
           raw_travel_plans = self.get_all_raw_travel_plans_from_db()
+
+          self.construct_travel_plans_from_raw(raw_travel_plans)
+        end
+
+        # Same as `#get_all_constructed_travel_plans` but for a specific id, returning
+        # an array with one element.
+        #
+        # IT still returns an array so its possible to reuse all methods from get_all methods.
+        # Service is them responsible for getting the first element.
+        def self.get_by_id_constructed_travel_plans(id : Int32) : Array(ConstructedTravelPlan)
+          raw_travel_plans : Array(RawTravelPlan) = self
+            .get_raw_travel_plan_from_db_by_id(id)
 
           self.construct_travel_plans_from_raw(raw_travel_plans)
         end
@@ -79,7 +91,6 @@ module TravelPlansRoute
         #
         # Used in `TravelStopsService::Service` to build and array
         # that will be served to fetch locations from Rick And Morty API.
-
         def self.get_all_unique_travel_stops_ids(
           construct_travel_plans : Array(ConstructedTravelPlan)
         ) : Array(Int32)

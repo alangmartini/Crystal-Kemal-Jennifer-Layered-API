@@ -8,6 +8,8 @@ require "src/services/helper/GetAndConstructLocations.helper"
 require "src/services/helper/GetAndConstructTravelPlans.helper"
 require "src/services/helper/ManageTravelPlan.helper"
 
+require "src/errors/NotFound.error"
+
 require "src/entities/TravelPlans/RawTravelPlan.entity"
 require "src/entities/TravelPlans/ConstructedTravelPlan.entity"
 require "src/entities/TravelPlans/ConstructedOptimisedTravelPlan.entity"
@@ -74,7 +76,7 @@ module TravelPlansRoute
           @TravelPlanModel
             .where { _id == id.to_i }
             .delete()
-            
+
           @TravelStopsModel
             .where { _travel_stop_id == id.to_i }
             .delete()
@@ -106,11 +108,11 @@ module TravelPlansRoute
           # TODO: take this out of service and create an appropriate class
           # or module for transactions and other db methods.
           Jennifer::Adapter.default_adapter.transaction do |tx|
-            travel_stops.each_with_index do |travel_stop, index|
-              @TravelStopsModel
+            @TravelStopsModel
                 .where { (_travel_plan_id == id) }
                 .delete()
-            
+        
+            travel_stops.each_with_index do |travel_stop, index|
               @TravelStopsModel
                 .create({
                   travel_plan_id: id,
@@ -125,11 +127,36 @@ module TravelPlansRoute
           }
         end
 
+        def get_by_id_travel_plan(
+          id : Int32,
+          optimise : Bool,
+          expand : Bool,
+        )
+          constructed_travel_plan :
+            Array(ConstructedTravelPlan) =
+              Helper::GetAndConstructTravelPlans
+                .get_by_id_constructed_travel_plans(id)
+
+          if constructed_travel_plan.size == 0
+            raise Errors::NotFound.new("No Travel Plan with given ID")
+          end
+
+          if (!optimise && !expand)
+            return constructed_travel_plan.first
+          end
+          
+          return expand_and_or_optimise_constructed_travel_plans(
+            optimise,
+            expand,
+            constructed_travel_plan
+          ).first
+        end
+
         # Get all TravelPlans in DB, optimising or expanding them
         # into `ConstructedTravelPlan` or `ConstructedExpandedTravelPlan`
         def get_all_travel_plans(
+          optimise : Bool,
           expand : Bool,
-          optimise : Bool
         ) : Array(ConstructedTravelPlan) |
           Array(ConstructedExpandedTravelPlan) |
           Array(ConstructedOptimisedTravelPlan) |
@@ -143,6 +170,21 @@ module TravelPlansRoute
             return constructed_travel_plans
           end
 
+          return expand_and_or_optimise_constructed_travel_plans(
+            optimise,
+            expand,
+            constructed_travel_plans
+          )
+        end
+
+        # Aggregates all operations necessary for expanding
+        # and/or optimising the travel plans. Used in get_all
+        # and get_by_id methods
+        def expand_and_or_optimise_constructed_travel_plans(
+          optimise : Bool,
+          expand : Bool,
+          constructed_travel_plans : Array(ConstructedTravelPlan)
+        )
           # Starting work in expanding and optimising the travel plans.
           # Gets the Locations (which are the Travel Stops expanded, or with
           # more information, if you will) from the Api. Already

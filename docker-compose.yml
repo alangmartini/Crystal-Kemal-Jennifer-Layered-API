@@ -21,4 +21,4 @@ services:
       - CRYSTAL_PATH=/app/lib:/app:/usr/bin/../share/crystal/src
     tty: true
     stdin_open: true
-    # command: crystal run src/app.cr
+    command: crystal run src/app.cr

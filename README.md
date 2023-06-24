@@ -85,6 +85,11 @@ Controllers: Responsible for handling requests and responses.
 Services: Responsible for handling business logic.
 Models: Responsible for retrieving data from DB.
 
+## Tables
+
+### insert image here.
+
+
 ## OOP
 
 The project also tries to implement OOP with SOLIDs principles. Most
@@ -110,3 +115,15 @@ facilitates at lot the code organization,
 and allow for a better structured docs.
 
 Con is that the variable and methods names get pretty large.
+
+# Next steps
+
+If i were given more time, I would:
+
+- Add more tests
+- Create a flow Middleware > Client > Handler 
+  | Handler > Client > Response for  errors.
+- Add threading to expensive operations and
+ requisitions to Rick And Morty Api
+- Move validations (like id and body) to middlewares and add more
+- Create a better algorithm for optimising.

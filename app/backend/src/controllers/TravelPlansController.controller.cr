@@ -5,6 +5,8 @@ require "src/controllers/helper/ManageResponse.helper"
 
 require "src/services/TravelPlansService.service"
 
+require "src/errors/NotFound.error"
+
 require "src/entities/TravelPlans/TravelStopsJSON.entity"
 require "src/entities/TravelPlans/RawTravelPlan.entity"
 require "src/entities/TravelPlans/ConstructedTravelPlan.entity"
@@ -27,11 +29,6 @@ module TravelPlansRoute
 
       # Create new TravelPlan. Used in POST /travel_plans
       #
-      # Uses Content-Length header to check for Body.
-      # If Content-Length is 0, then it returns a 400 Bad Request
-      #
-      #
-      # @param env : HTTP::Server::Context
       def create_travel_plan(env : HTTP::Server::Context)
         begin
           if env.request.body.nil?
@@ -73,7 +70,6 @@ module TravelPlansRoute
 
       # Update a TravelPlan. Used in PUT /travel_plans/:id
       #
-      # @param env : HTTP::Server::Context
       def update_travel_plan(env : HTTP::Server::Context)
         begin
           id : String | Nil = env.params.url["id"]
@@ -107,16 +103,19 @@ module TravelPlansRoute
             .set_response_json(
               e.message.not_nil!, 400, env
             )
+        rescue e : Errors::NotFound
+          return Helper
+            .set_response_json(
+              e.message.not_nil!, 404, env
+            )
         rescue e
           return Helper
             .set_response_json(e.message.to_json, 500, env)
         end
       end
 
-
       # Delete a TravelPlans. Used in DELETE /travel_plans
       #
-      # @param env : HTTP::Server::Context
       def delete_travel_plan(env : HTTP::Server::Context)
         begin
           id : String | Nil = env.params.url["id"]
@@ -141,6 +140,11 @@ module TravelPlansRoute
             .set_response_json(
               e.message.not_nil!, 400, env
             )
+        rescue e : Errors::NotFound
+          return Helper
+            .set_response_json(
+              e.message.not_nil!, 404, env
+            )
         rescue e
           return Helper
             .set_response_json(e.message.to_json, 500, env)
@@ -149,7 +153,6 @@ module TravelPlansRoute
 
       # Get all TravelPlans. Used in GET /travel_plans
       #
-      # @param env : HTTP::Server::Context
       def get_all_travel_plans(env : HTTP::Server::Context)
         begin
           # Cast String as Bool
@@ -178,7 +181,49 @@ module TravelPlansRoute
             .set_response_json(e.message.to_json, 500, env)
         end
       end
-    
+
+      def get_by_id_travel_plan(env : HTTP::Server::Context)
+        begin
+          id : String | Nil = env.params.url["id"]
+
+          if id.nil?
+            return Helper.set_response_json(
+                "No ID provided", 400, env
+              )        
+          end
+
+          # Cast String as Bool
+          optimise = env.params.query["optimize"]? == "true"
+          expand = env.params.query["expand"]? == "true"
+
+          travel_plan :
+            ConstructedTravelPlan |
+            ConstructedExpandedTravelPlan |
+            ConstructedOptimisedTravelPlan |
+            ConstructedOptimisedExpandedTravelPlan = @TravelPlansService
+                .get_by_id_travel_plan(id.to_i, optimise, expand)
+
+          Helper
+            .set_response_json("", 200, env)
+
+          return travel_plan.to_json
+        
+        rescue e : ArgumentError
+          return Helper
+            .set_response_json(
+              e.message.not_nil!, 400, env
+            )
+        rescue e : Errors::NotFound
+          puts "message is #{e.message}"
+          return Helper
+            .set_response_json(
+              "ID not Found", 404, env
+            )
+        rescue e
+          return Helper
+            .set_response_json(e.message.to_json, 500, env)
+        end
+      end
     end
   end
 end

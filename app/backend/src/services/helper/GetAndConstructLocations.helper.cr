@@ -49,6 +49,7 @@ module TravelPlansRoute
           # on optimising.
           
           if optimise
+            puts "hello"
             optimised_location : Array(SimplifiedLocation) = 
               ManageLocation::LocationOptimiser
                 .optimise(simplified_locations)
