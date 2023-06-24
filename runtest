@@ -58,6 +58,8 @@ loop do
 # Small fix since the error is just IO::Error
 # and not IO::EOFError
 rescue IO::Error
+rescue IO::EOFError
+rescue e
 end
 
 puts "Successfully reached API."
