@@ -72,6 +72,8 @@ module TravelPlansRoute
       end
 
       # Update a TravelPlan. Used in PUT /travel_plans/:id
+      #
+      # @param env : HTTP::Server::Context
       def update_travel_plan(env : HTTP::Server::Context)
         begin
           id : String | Nil = env.params.url["id"]
@@ -109,7 +111,40 @@ module TravelPlansRoute
           return Helper
             .set_response_json(e.message.to_json, 500, env)
         end
+      end
 
+
+      # Delete a TravelPlans. Used in DELETE /travel_plans
+      #
+      # @param env : HTTP::Server::Context
+      def delete_travel_plan(env : HTTP::Server::Context)
+        begin
+          id : String | Nil = env.params.url["id"]
+
+          if id.nil?
+            return Helper.set_response_json(
+                "No ID provided", 400, env
+              )        
+          end
+
+          # Raises error if anything goes wrong
+          @TravelPlansService.delete_travel_plan(id.to_i)
+
+          Helper
+            .set_response_json(
+              "", 204, env
+            )
+
+          return
+        rescue e : ArgumentError
+          return Helper
+            .set_response_json(
+              e.message.not_nil!, 400, env
+            )
+        rescue e
+          return Helper
+            .set_response_json(e.message.to_json, 500, env)
+        end
       end
 
       # Get all TravelPlans. Used in GET /travel_plans

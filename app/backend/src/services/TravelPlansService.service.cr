@@ -57,14 +57,40 @@ module TravelPlansRoute
           constructed_travel_plan
         end
 
+        def delete_travel_plan(
+          id : Int32
+        )
+          # Just to check if the travel plan exists
+          raw_travel_plan : RawTravelPlan =
+            Helper::GetAndConstructTravelPlans
+              .get_raw_travel_plan_from_db_by_id(id).first
+
+          if raw_travel_plan.nil?
+            raise ArgumentError.new("No Travel Plan with given ID")
+          end
+
+          # If any error, Controller is responsible for
+          # rescuing.
+          @TravelPlanModel
+            .where { _id == id.to_i }
+            .delete()
+            
+          @TravelStopsModel
+            .where { _travel_stop_id == id.to_i }
+            .delete()
+
+          return  
+        end
+
         def update_travel_plan(
           id : Int32,
           travel_stops_json : TravelStopsJSON,
         )
-          # We wont need a `ConstructedTravelPlan` since we only
-          # need the id to update.
-          raw_travel_plan = Helper::GetAndConstructTravelPlans
-            .get_raw_travel_plan_from_db_by_id(id)
+
+          # Just to check if the travel plan exists
+          raw_travel_plan : RawTravelPlan =
+            Helper::GetAndConstructTravelPlans
+              .get_raw_travel_plan_from_db_by_id(id).first
 
           if raw_travel_plan.nil?
             raise ArgumentError.new("No Travel Plan with given ID")
@@ -72,10 +98,11 @@ module TravelPlansRoute
 
           # Starts a transaction
           # I decided to remove and created, even if the PK wont reset
-          # since it handles the case where the to update travel_stops
+          # since it handles the case where the to-update travel_stops
           # don't have the same length as the current travel_stops
 
           travel_stops : Array(Int32) = travel_stops_json.travel_stops
+
           # TODO: take this out of service and create an appropriate class
           # or module for transactions and other db methods.
           Jennifer::Adapter.default_adapter.transaction do |tx|

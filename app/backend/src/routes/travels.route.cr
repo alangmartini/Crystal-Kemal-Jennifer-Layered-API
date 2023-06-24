@@ -25,6 +25,7 @@ module TravelPlansRoute
   end
 
   delete "/travel_plans/:id" do |env|
+    travel_plans_controller.delete_travel_plan(env)
   #   id = env.params.url["id"]
 
   #   if !id
