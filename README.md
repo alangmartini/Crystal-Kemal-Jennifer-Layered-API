@@ -95,6 +95,11 @@ Each module or class has its own importations declared at the top of the its fil
 Although it seems like a effort duplication, it facilitates
 unit testing. It also makes it easier to know which modules are being used.
 
+### Why absolute and not relative
+
+With the frequent refactoring and folder structure changes,
+it was becoming messy to use relative importations.
+
 ## Why Class or Module
 
 Found empiricately that using modules
