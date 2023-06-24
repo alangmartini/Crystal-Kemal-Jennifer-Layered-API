@@ -59,13 +59,33 @@ module TravelPlansRoute
           ).map { |travel_stop| travel_stop.id }
         end
 
-        # Returns the ExpandedTravelStop to normal TravelStops, which
-        # only contain the id.
-        def self.unexpand_travel_stops(
-          expanded_travel_stops : Array(ExpandedTravelStop)
-        ) : Array(Int32)
-          expanded_travel_stops.map { |travel_stop| travel_stop.id }
-        end   
+        # For each travel_stop supplied, create a new RelTravelPlansTravelStops
+        # in DB, relationing it to the TravelPlan
+        def self.create_travel_stops(
+          travel_stops_json : TravelStopsJSON,
+          id : Int32
+          ) : Array(Int32)
+          rel_travel_plans = [] of RelTravelPlansTravelStops
+
+          travel_stops_json
+            .travel_stops
+            .each do |travel_stop|
+              created_travel_stop = RelTravelPlansTravelStops
+                .new({
+                  travel_plan_id: id,
+                  travel_stop_id: travel_stop
+                })
+
+              rel_travel_plans << created_travel_stop
+            end
+
+            RelTravelPlansTravelStops.import(rel_travel_plans)
+
+          travel_stops = rel_travel_plans.map { |rel_travel_plan|
+            rel_travel_plan.travel_stop_id }
+
+          travel_stops  
+        end
       end
     end
   end
