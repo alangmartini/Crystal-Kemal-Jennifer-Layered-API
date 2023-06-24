@@ -1,5 +1,5 @@
-require "/entities/RickAndMorty/entities/Location.entity"
-require "/entities/RickAndMorty/entities/SimplifiedLocation.entity"
+require "src/RickAndMorty/entities/Location.entity"
+require "src/RickAndMorty/entities/SimplifiedLocation.entity"
 
 
 module TravelPlansService
@@ -14,15 +14,15 @@ module TravelPlansService
       alias SimplifiedLocation = RickAndMorty::Entities::SimplifiedLocation
 
       # Calculate the amount of `Resident`s in a `Location`
-      def self.calculate_residents(residents_arr : Array(Resident)) : Int64
-        episode_size = [] of Int64
+      def self.calculate_residents(residents_arr : Array(Resident)) : Int32
+        episode_size = [] of Int32
         residents_arr.each do |resident|
           resident.episode.each do |character|
-            episode_size << character.characters.size.to_i64
+            episode_size << character.characters.size
           end
         end
     
-        episode_size.sum.to_i64
+        episode_size.sum
       end
     
       # Do the simplification of the `Location` entity to a
@@ -39,7 +39,7 @@ module TravelPlansService
           new_resident = self.calculate_residents(location.residents)
     
           new_location = SimplifiedLocation.new(
-            id: location.id.to_i64,
+            id: location.id.to_i,
             dimension: location.dimension,
             name: location.name,
             residents: new_resident,

@@ -1,3 +1,9 @@
+require "src/services/helper/ManageTravelStops.helper"
+require "src/entities/TravelPlans/ConstructedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedOptimisedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedExpandedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedOptimisedExpandedTravelPlan.entity"
+
 module TravelPlansService
   # Module for operations involving the reconstruction
   # of `ConstructedTravelPlan` into its optimised
@@ -6,7 +12,7 @@ module TravelPlansService
     alias SimplifiedLocation = RickAndMorty::Entities::SimplifiedLocation
     # Reconstruction of `ConstructedTravelPlan` into its
     # optimised version: `ConstructedOptimisedTravelPlan`.
-    def reconstruct_optimised_travel_plans(
+    def self.reconstruct_optimised_travel_plans(
       constructed_travel_plans : Array(ConstructedTravelPlan),
       simplified_locations : Array(SimplifiedLocation)
     ) : Array(ConstructedOptimisedTravelPlan)
@@ -25,7 +31,7 @@ module TravelPlansService
     end
     # Reconstruction of `ConstructedTravelPlan` into its
     # expanded version: `ConstructedExpandedTravelPlan`.
-    def reconstruct_expanded_travel_plans(
+    def self.reconstruct_expanded_travel_plans(
       constructed_travel_plans : Array(ConstructedTravelPlan),
       simplified_locations : Array(SimplifiedLocation)
     ) : Array(ConstructedExpandedTravelPlan)
@@ -46,21 +52,21 @@ module TravelPlansService
 
     # Reconstruction of `ConstructedTravelPlan` into its
     # expanded and optimised version:
-    # `ConstructedExpandedOptimisedTravelPlan`.
-    def reconstruct_expanded_and_optimised_travel_plans(
+    # `ConstructedOptimisedExpandedTravelPlan`.
+    def self.reconstruct_expanded_and_optimised_travel_plans(
       constructed_travel_plans : Array(ConstructedTravelPlan),
       simplified_locations : Array(SimplifiedLocation)
-      ) : Array(ConstructedExpandedOptimisedTravelPlan)
+      ) : Array(ConstructedOptimisedExpandedTravelPlan)
       constructed_travel_plans.map do |constructed_travel_plan|
-        expanded_travel_stops : Array(Int32) = ManageTravelStops
+        expanded_travel_stops : Array(ExpandedTravelStop) = ManageTravelStops
           .get_expanded_travel_stops(
             simplified_locations,
             constructed_travel_plan.travel_stops
           )
 
-          ConstructedExpandedOptimisedTravelPlan.new(
+          ConstructedOptimisedExpandedTravelPlan.new(
           constructed_travel_plan.id,
-          travel_stops,
+          expanded_travel_stops,
         )
       end
     end

@@ -12,7 +12,7 @@ module TravelPlansService
   #
   # Although it makes a little messier to make a TravelPlan, is compliant
   # to table normalization. Another option is use a NoSQL database.
-  module GetAndConstrucTravelPlans
+  module GetAndConstructTravelPlans
     # Get all `TravelPlans` from DB and construct them to `RawTravelPlan` objects
     def self.get_all_raw_travel_plans_from_db() : Array(RawTravelPlan)
       # In Jennifer, .all only refers to a query,

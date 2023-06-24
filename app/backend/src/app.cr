@@ -1,6 +1,6 @@
 require "kemal"
-require "../config/config.cr"
-require "./routes/travels.route.cr"
+require "config/config.cr"
+require "src/routes/travels.route.cr"
 
 puts "Initiating server"
 

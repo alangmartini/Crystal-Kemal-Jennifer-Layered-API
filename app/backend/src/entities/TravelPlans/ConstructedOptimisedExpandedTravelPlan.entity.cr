@@ -1,3 +1,5 @@
+require "src/entities/TravelPlans/ExpandedTravelStop.entity"
+
 # Structuraly identical to `ConstructedExpandedTravelPlan`
 # but was made for clearer understanding of the code.
 class ConstructedOptimisedExpandedTravelPlan

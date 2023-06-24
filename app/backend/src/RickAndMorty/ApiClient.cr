@@ -1,4 +1,4 @@
-require "../HttpClient.entity"
+require "src/entities/HttpClient.entity"
 
 # class QueryResponse
 #   getter data: String
@@ -8,7 +8,7 @@ require "../HttpClient.entity"
 # and Morty API.
 module RickAndMorty
   class ApiClient
-    def initialize(@ids : Array(Int64))
+    def initialize(@ids : Array(Int32))
       @http_client = HttpClient.new("rickandmortyapi.com", true)
       @query = <<-GRAPHQL
       query GetLocations($ids: [ID!]!) {

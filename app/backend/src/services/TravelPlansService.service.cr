@@ -1,8 +1,24 @@
-require "../abstracts/services/**"
-require "../entities/TravelPlans/RawTravelPlan.entity"
+require "src/services/helper/ManageLocation.helper"
+require "src/abstracts/services/absTravelPlansService.abstract"
+
+require "src/RickAndMorty/ApiClient"
+require "src/RickAndMorty/entities/SimplifiedLocation.entity"
+
+require "src/services/helper/GetAndConstructLocations.helper"
+require "src/services/helper/GetAndConstructTravelPlans.helper"
+require "src/services/helper/ManageTravelPlan.helper"
+
+require "src/entities/TravelPlans/RawTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedOptimisedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedExpandedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedOptimisedExpandedTravelPlan.entity"
 
 module TravelPlansService
     class Service < AbstractTravelPlanService
+      alias SimplifiedLocation = RickAndMorty::Entities::SimplifiedLocation
+      alias Location = RickAndMorty::Entities::Location
+
       @TravelPlanModel : TravelPlans.class
       @TravelStopsModel : RelTravelPlansTravelStops.class
 
@@ -66,12 +82,72 @@ module TravelPlansService
         travel_stops  
       end
 
+      # Get all TravelPlans in DB, optimising or expanding them
+      # into `ConstructedTravelPlan` or `ConstructedExpandedTravelPlan`
       def get_all_travel_plans(
         expand : Bool,
         optimise : Bool
-      ) : Array( ConstructedTravelPlan) | Array()
-        puts "oi"
+      ) : Array(ConstructedTravelPlan) |
+        Array(ConstructedExpandedTravelPlan) |
+        Array(ConstructedOptimisedTravelPlan) |
+        Array(ConstructedOptimisedExpandedTravelPlan)
 
+        constructed_travel_plans = 
+          GetAndConstructTravelPlans
+            .get_all_constructed_travel_plans()
+
+        if constructed_travel_plans.empty? || (!optimise && !expand)
+          return constructed_travel_plans
+        end
+
+        # Starting work in expanding and optimising the travel plans.
+        # Gets the Locations (which are the Travel Stops expanded, or with
+        # more information, if you will) from the Api. Already
+        # optimises it if necessary.
+        #
+        # constructed_travel_plans is a parameter 
+        # because it needs a reference for doing optimisation.
+        travel_stops : Array(Int32) = 
+          GetAndConstructTravelPlans
+            .get_all_unique_travel_stops_ids(constructed_travel_plans)
+
+        simplified_locations : Array(SimplifiedLocation) = 
+          GetAndConstructLocations
+            .get_locations(optimise, travel_stops, constructed_travel_plans)
+
+        if !expand
+          reconstructed_optimised_travel_plans :
+            Array(ConstructedOptimisedTravelPlan) =
+              ManageTravelPlan
+                .reconstruct_optimised_travel_plans(
+                  constructed_travel_plans,
+                  simplified_locations
+                )
+
+          return reconstructed_optimised_travel_plans
+        end
+
+        if !optimise
+          reconstructed_expanded_travel_plans :
+            Array(ConstructedExpandedTravelPlan) =
+              ManageTravelPlan
+                .reconstruct_expanded_travel_plans(
+                  constructed_travel_plans,
+                  simplified_locations
+                )
+
+          return reconstructed_expanded_travel_plans
+        end
+
+        reconstructed_expanded_and_optimised_travel_plans :
+          Array(ConstructedOptimisedExpandedTravelPlan) =
+            ManageTravelPlan
+              .reconstruct_expanded_and_optimised_travel_plans(
+                constructed_travel_plans,
+                simplified_locations
+              )
+
+        return reconstructed_expanded_and_optimised_travel_plans
       end
     end
 end

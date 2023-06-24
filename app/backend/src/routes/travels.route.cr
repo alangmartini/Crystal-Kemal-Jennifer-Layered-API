@@ -4,15 +4,7 @@ require "http/client"
 require "json"
 require "jennifer"
 
-require "../models/TravelPlans.model"
-require "../models/RelTravelPlansTravelStops.model"
-
-require "../entities/**"
-require "../actions/**"
-require "../controllers/**"
-require "../services/**"
-require "../abstracts/**"
-
+require "/controllers/TravelPlansController.controller"
 travel_plans_controller = TravelPlansController.new()
 
 module TravelPlansRoute
@@ -20,7 +12,8 @@ module TravelPlansRoute
     travel_plans_controller.create_travel_plan(env)
   end
 
-  # put "/travel_plans/:id" do |env|
+  put "/travel_plans/:id" do |env|
+    puts "oi"
   #   id = env.params.url["id"]
 
   #   if !id
@@ -136,80 +129,16 @@ module TravelPlansRoute
 
   #   env.response.content_type = "application/json"
   #   env.response.status_code = 204
-  # end
+  end
 
-  # get "/travel_plans" do |env|
-  #   begin
-  #     # Cast String as Bool
-  #     optimise = env.params.query["optimize"]? == "true"
-  #     expand = env.params.query["expand"]? == "true"
-
-  #     # Get TravelPlans from DB and construct them to ConstructedTravelPlan objects
-  #     constructed_travel_plans : Array(ConstructedTravelPlan) =
-  #       GetTravelPlansResponseConstructor
-  #         .get_all_constructed_travel_plans()
-
-  #     if constructed_travel_plans.empty? || (!optimise && !expand)
-  #       env.response.content_type = "application/json"
-  #       env.response.status_code = 200
-    
-  #       next constructed_travel_plans.to_json
-  #     end
-
-  #     travel_stops =
-  #       GetTravelPlansResponseConstructor
-  #         .get_all_unique_travel_stops_ids(
-  #           constructed_travel_plans
-  #       )
-
-  #     graph_ql_query = RickAndMortyApiClient.new(travel_stops)
-  #     response : JSON::Any = graph_ql_query.execute()
-      
-  #     locations : Array(Location) = response["data"]["locationsByIds"]
-  #       .as_a.map { |location| Location.from_json(location.to_json) }
-
-  #     simplified_locations : Array(SimplifiedLocation) = LocationSimplificator
-  #       .simplify(locations)
-
-  #     if optimise
-  #       optimised_locations :
-  #         Array(SimplifiedLocation) =
-  #           LocationOptimiser
-  #             .optimise(simplified_locations)
-
-  #       simplified_locations = optimised_locations
-  #     end
-
-  #     expand_and_or_optimised_constructed_travel_plans :
-  #       Array(
-  #         ConstructedTravelPlan |
-  #         ConstructedExpandedTravelPlan
-  #       ) =
-  #           TravelPlanOptimiser.construct_travel_plans(
-  #             expand,
-  #             constructed_travel_plans,
-  #             simplified_locations
-  #           )
-
-  #     env.response.content_type = "application/json"
-  #     env.response.status_code = 200
-
-  #     next expand_and_or_optimised_constructed_travel_plans.to_json
-  #   rescue e
-  #     env.response.content_type = "application/json"
-  #     env.response.status_code = 500
-
-  #     next {
-  #       "message" => "Something went wrong #{e}",
-  #       "status_code" => 500
-  #     }.to_json
-  #   end
-  # end
+  get "/travel_plans" do |env|
+    travel_plans_controller.get_all_travel_plans(env)
+  end
 
   # get "/travel_plans/:id" do |env|
   #   begin
   #     id = env.params.url["id"]
-  #     # Cast String as Bool
+  #     Cast String as Bool
   #     optimise = env.params.query["optimize"]? == "true"
   #     expand = env.params.query["expand"]? == "true"
 

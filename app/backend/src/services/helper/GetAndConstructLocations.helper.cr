@@ -1,7 +1,7 @@
-require "/entities/RickAndMorty/entities/Location.entity"
-require "/entities/RickAndMorty/entities/SimplifiedLocation.entity"
-require "/entities/RickAndMorty/ApiClient"
-require "/services/TravelPlansService/helper/ManageLocation.helper"
+require "src/RickAndMorty/entities/Location.entity"
+require "src/RickAndMorty/entities/SimplifiedLocation.entity"
+require "src/RickAndMorty/ApiClient"
+require "src/services/helper/ManageLocation.helper.cr"
 
 module TravelPlansService
   # Module that contains the logic to get the `Location` entity
@@ -17,6 +17,7 @@ module TravelPlansService
     # `SimpleLocation` entity. Raises error if Api is not available.
     def self.get_locations(
         optimise : Bool,
+        travel_stops : Array(Int32),
         constructed_travel_plans : Array(ConstructedTravelPlan)
       ) : Array(SimplifiedLocation)
       # TODO: apply threading
@@ -43,10 +44,11 @@ module TravelPlansService
 
       # Check ManageLocation::LocationOptimiser for rules followed 
       # on optimising.
+      
       if optimise
         optimised_location : Array(SimplifiedLocation) = 
           ManageLocation::LocationOptimiser
-            .optimise(constructed_travel_plans)
+            .optimise(simplified_locations)
 
         simplified_locations = optimised_location
       end

@@ -1,3 +1,5 @@
+require "src/entities/TravelPlans/ExpandedTravelStop.entity"
+
 class ConstructedExpandedTravelPlan
   property id : Int32
   property travel_stops : Array(ExpandedTravelStop)

@@ -1,6 +1,12 @@
-require "../services/TravelPlansService.service"
-require "../entities/TravelPlans/TravelStopsJSON.entity"
-require "./helper/HelperTravelPlansController.helper"
+require "src/services/TravelPlansService.service"
+require "src/entities/TravelPlans/TravelStopsJSON.entity"
+require "src/controllers/helper/HelperTravelPlansController.helper"
+
+require "src/entities/TravelPlans/RawTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedOptimisedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedExpandedTravelPlan.entity"
+require "src/entities/TravelPlans/ConstructedOptimisedExpandedTravelPlan.entity"
 
 # Controller for TravelPlans routes
 #
@@ -69,10 +75,11 @@ class TravelPlansController
       optimise = env.params.query["optimize"]? == "true"
       expand = env.params.query["expand"]? == "true"
       
-      all_travel_plans : Array(
-        ConstructedTravelPlan |
-        ConstructedExpandedTravelPlan
-      ) = @TravelPlansService
+      all_travel_plans :
+        Array(ConstructedTravelPlan) |
+        Array(ConstructedExpandedTravelPlan) |
+        Array(ConstructedOptimisedTravelPlan) |
+        Array(ConstructedOptimisedExpandedTravelPlan) = @TravelPlansService
             .get_all_travel_plans(optimise, expand)
 
       HelperTravelPlansController

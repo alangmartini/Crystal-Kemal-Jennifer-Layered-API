@@ -1,4 +1,4 @@
-require "entities/ExpandedTravelStop"
+require "src/entities/TravelPlans/ExpandedTravelStop.entity"
 
 module TravelPlansService
   # Module for handling Travel Stops operations, like expading
