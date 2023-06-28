@@ -11,10 +11,12 @@
   - [Docs as HTML](#docs-as-html)
   - [Benchmarks](#benchmarks)
   - [To run Hiring Team tests](#to-run-hiring-team-tests)
+  - [Entering in dev mode](#entering-in-dev-mode)
   - [Note](#note)
 - [API](#api)
   - [Travel Plans](#travel-plans)
     - [GET /travel_plans/:id](#get-travel_plansid)
+    - [GET /travel_plans/](#get-travel_plans)
     - [POST /travel_plans](#post-travel_plans)
     - [PUT /travel_plans/:id](#put-travel_plansid)
     - [DELETE /travel_plans/:id](#delete-travel_plansid)
@@ -29,6 +31,9 @@
 API build for a Code Challenge from a job posting. It uses
 [Crystal](https://crystal-lang.org/), a programming language with ruby-like sintax
 and performance close to C.
+
+It was developed using TDD principles and OOP. Trying my best to apply
+SOLID principles and Clean Code in a Layered Architecture. Contains Unit and E2E tests.
 
 ### Built With
 - Docker
@@ -80,6 +85,35 @@ python3 -m http.server
 
 </details>
 
+### To run Hiring Team tests
+Runtest run "docker-compose up", so make sure you're outside a docker container and dont have any service up.
+
+```
+crystal run runtest
+```
+
+**Note:** There was a small mistake on runtest file, so I had to change the following line:
+
+```
+ rescue IO::EOFError
++ rescue IO::Error
+```
+
+Probably it was a breaking change on Crystal 0.35.1, or other versions, or is the error the crystal version in CI/CL will search for, but was breaking in crystal 1.8.2.
+
+### Entering in dev mode
+
+To facilitate developing and looking around, development mode is available. It will simply start the container and you can attach and run the commands from inside, with db (in test mode for now) and all envs already set up.
+
+
+```bash
+  docker-compose -f docker-compose.dev.yml up
+```
+
+### Note
+
+For any command that has to be run inside docker, is better if run in dev mode, since test and prod will run the server on start.Ex: benchmarks bellow.
+
 ### Benchmarks
 
 Start the service and open the container with bash.
@@ -102,26 +136,6 @@ Or navigate to app/backend, install shards and run command:
 ```
   /usr/bin/time -v crystal sam.cr benchmark
 ```
-
-### To run Hiring Team tests
-
-```
-crystal run runtest
-```
-
-**Note:** There was a small mistake on runtest file, so I had to change the following line:
-
-```
- rescue IO::EOFError
-+ rescue IO::Error
-```
-
-Probably it was a breaking change on Crystal 0.35.1, or other versions, or is the error the crystal version in CI/CL will search for, but was breaking in crystal 1.8.2.
-
-
-### Note
-
-For all commands above, if running outside docker, you need to have crystal installed and set CRYSTAL_PATH env. (example in docker-compose 'enviroments').
 
 ## API
 
@@ -272,6 +286,9 @@ greatly improved:
 - Add threading to expensive operations and requisitions to Rick And Morty Api
 - Move validations (like id and body) to middlewares and add more restrictions.
 - Create a better algorithm for optimising.
+
+- Make the design more decoupled, so it can be more easily changed and easier
+ to add new features and create unit tests.
 
 ## Contact
 
